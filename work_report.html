@@ -165,6 +165,30 @@
   .sign-row .line{display:inline-block;border-bottom:1px solid #333;width:180px;margin-left:8px;padding:0 6px;font-family:'IBM Plex Sans Thai',sans-serif;font-weight:500;text-align:center}
   .sign-role{padding-left:60px;font-size:11.5px;font-weight:600;margin-bottom:10px;margin-top:2px}
 
+  /* photo report mode */
+  .photo-page{padding:0;background:#fff;display:flex;flex-direction:column}
+  .photo-hd{position:relative;padding:30px 30px 10px;text-align:center}
+  .photo-hd::before{content:"";position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(180deg,var(--yellow) 55%,transparent 100%);clip-path:polygon(0 0,25% 0,35% 100%,65% 100%,75% 0,100% 0,100% 100%,0 100%)}
+  .photo-hd .ph-logo{position:absolute;top:8px;right:14px;height:30px;z-index:2}
+  .photo-hd .photo-title-box{
+    display:inline-block;position:relative;z-index:2;
+    border:2px solid var(--yellow);padding:8px 24px;margin-top:36px;
+    font-family:'Sarabun',sans-serif;font-size:15px;color:#0F1836;line-height:1.5;
+  }
+  .photo-hd::after{
+    content:"";position:absolute;top:80px;left:60px;right:60px;height:1px;
+    background:linear-gradient(90deg,#8B6D45 0%,#8B6D45 30%,transparent 30%,transparent 70%,#8B6D45 70%,#8B6D45 100%);
+  }
+  .photo-grid{
+    padding:20px 30px 30px;flex:1;
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:14px 12px;
+  }
+  .photo-cell{display:flex;flex-direction:column;align-items:center}
+  .photo-cell .ph-img{width:100%;aspect-ratio:1;overflow:hidden;background:#F0F0F0}
+  .photo-cell .ph-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .photo-cell .ph-cap{font-size:11px;color:#0F1836;font-weight:600;margin-top:6px;text-align:center;line-height:1.35}
+  .photo-cell .ph-note{font-size:10.5px;color:#6B7280;margin-top:2px;text-align:center}
+
   @media(max-width:520px){
     .top-title{font-size:14px}
     .fld-row{grid-template-columns:1fr}
@@ -194,6 +218,7 @@
       <option value="weekly">รายงานประจำสัปดาห์</option>
       <option value="defect_in">Defect ภายใน</option>
       <option value="defect_out">Defect ภายนอก</option>
+      <option value="handover">ส่งมอบงาน</option>
     </select>
   </div>
   <div id="listWrap"></div>
@@ -212,6 +237,9 @@
         </div>
         <div class="type-card" onclick="openEditor(null,'defect_out')">
           <div class="ic">🏢</div><div class="nm">Defect ภายนอก</div><div class="ds">งานแก้ไขภายนอกอาคาร</div>
+        </div>
+        <div class="type-card" onclick="openEditor(null,'handover')">
+          <div class="ic">✅</div><div class="nm">ส่งมอบงาน</div><div class="ds">Work Handover</div>
         </div>
         <div class="type-card" onclick="openEditor(null,'daily_photo')">
           <div class="ic">📸</div><div class="nm">รายงานประจำวัน</div><div class="ds">แบบรูป (Photo Log)</div>
@@ -344,7 +372,8 @@ const TYPE_LABEL = {
   daily: "ประจำวัน",
   weekly: "ประจำสัปดาห์",
   defect_in: "Defect ภายใน",
-  defect_out: "Defect ภายนอก"
+  defect_out: "Defect ภายนอก",
+  handover: "ส่งมอบงาน"
 };
 
 let REPORTS = [];
@@ -475,6 +504,7 @@ function openEditor(editId, type){
     const defaultTitle = {
       defect_in: "รายงานแก้ไข DEFECT",
       defect_out: "รายงานแก้ไข DEFECT ภายนอก",
+      handover: "ส่งมอบงาน",
       daily_photo: "รายงานประจำวัน",
       daily: "รายงานประจำวัน",
       weekly: "รายงานประจำสัปดาห์"
@@ -531,10 +561,42 @@ function renderFloors(){
 
 function renderItem(fi, ii, it){
   const isDone = it.status === "done";
+  const isHandover = CURRENT_TYPE === "handover";
+  const isPhotoMode = ["daily_photo","daily","weekly"].includes(CURRENT_TYPE);
+  const detailPh = isHandover ? "งานที่ส่งมอบ เช่น ทาสีผนังห้องนอน" :
+                  isPhotoMode ? "คำอธิบายภาพ เช่น รีซีล MS PU" :
+                  "รายละเอียดงาน เช่น แก้กระเบื้องขั้นเชิงบริเวณชาร์ปประปา";
+
+  if(isPhotoMode){
+    // photo mode: 1 photo + caption + optional note
+    return `<div class="def-item">
+      <div class="def-item-hd">
+        <span class="no">${ii+1}</span>
+        <input value="${esc(it.detail||"")}" placeholder="${detailPh}" onchange="setItemField(${fi},${ii},'detail',this.value)"/>
+      </div>
+      <div class="def-photos" style="grid-template-columns:1fr">
+        <label class="def-ph ${it.before?'has-img':''}" for="fPhBefore_${fi}_${ii}" style="aspect-ratio:16/10">
+          <button type="button" class="rm" onclick="event.preventDefault();event.stopPropagation();clearPhoto(${fi},${ii},'before')">✕</button>
+          ${it.before ? `<img src="${it.before}">` : '<div class="empty-msg">📷 แตะเพื่อเพิ่มรูป</div>'}
+        </label>
+        <input id="fPhBefore_${fi}_${ii}" type="file" accept="image/*" style="display:none" onchange="onItemPhoto(event,${fi},${ii},'before')"/>
+      </div>
+      <div class="def-status-row">
+        <input class="note-in" value="${esc(it.note||"")}" placeholder="หมายเหตุ (ไม่บังคับ)" onchange="setItemField(${fi},${ii},'note',this.value)"/>
+      </div>
+      <div class="def-item-ft">
+        <button class="btn btn-danger btn-sm" onclick="removeItem(${fi},${ii})">🗑 ลบรายการ</button>
+      </div>
+    </div>`;
+  }
+
+  const statusRow = isHandover ? "" : `
+    <label><input type="radio" name="st_${fi}_${ii}" ${isDone?'checked':''} onchange="setItemField(${fi},${ii},'status','done')"> ✅ แล้วเสร็จ</label>
+    <label><input type="radio" name="st_${fi}_${ii}" ${!isDone?'checked':''} onchange="setItemField(${fi},${ii},'status','pending')"> ⏳ คงค้าง</label>`;
   return `<div class="def-item">
     <div class="def-item-hd">
       <span class="no">${ii+1}</span>
-      <input value="${esc(it.detail||"")}" placeholder="รายละเอียดงาน เช่น แก้กระเบื้องขั้นเชิงบริเวณชาร์ปประปา" onchange="setItemField(${fi},${ii},'detail',this.value)"/>
+      <input value="${esc(it.detail||"")}" placeholder="${detailPh}" onchange="setItemField(${fi},${ii},'detail',this.value)"/>
     </div>
     <div class="def-photos">
       <label class="def-ph ${it.before?'has-img':''}" for="fPhBefore_${fi}_${ii}">
@@ -551,8 +613,7 @@ function renderItem(fi, ii, it){
       <input id="fPhAfter_${fi}_${ii}" type="file" accept="image/*" style="display:none" onchange="onItemPhoto(event,${fi},${ii},'after')"/>
     </div>
     <div class="def-status-row">
-      <label><input type="radio" name="st_${fi}_${ii}" ${isDone?'checked':''} onchange="setItemField(${fi},${ii},'status','done')"> ✅ แล้วเสร็จ</label>
-      <label><input type="radio" name="st_${fi}_${ii}" ${!isDone?'checked':''} onchange="setItemField(${fi},${ii},'status','pending')"> ⏳ คงค้าง</label>
+      ${statusRow}
       <input class="note-in" value="${esc(it.note||"")}" placeholder="หมายเหตุ" onchange="setItemField(${fi},${ii},'note',this.value)"/>
     </div>
     <div class="def-item-ft">
@@ -646,11 +707,16 @@ function openViewer(id){
 window.openViewer = openViewer;
 
 function renderDefectDoc(r){
+  const isHandover = r.type === "handover";
+  const isPhotoMode = ["daily_photo","daily","weekly"].includes(r.type);
+  const detailColLabel = isHandover ? "งานที่ส่งมอบ" : "รายละเอียดงาน";
+  const cols = isHandover ? 5 : 7;
+
   // Cover page
   const cover = `<div class="doc-page cover-page">
     <div class="lgtop"><img src="${window.LOGO_JMP}" alt="JM"></div>
     <h1>${esc(r.title||"")}</h1>
-    ${r.project ? `<h2>โครงการ ${esc(r.project)}</h2>` : ""}
+    ${r.project ? `<h2>${esc(r.project)}</h2>` : ""}
     ${r.cover ? `<div class="coverimg"><img src="${r.cover}"></div>` : ""}
     <div class="foot-brand">
       <div class="bd-txt">JM.<br>PAINTING</div>
@@ -660,50 +726,96 @@ function renderDefectDoc(r){
 
   const projectHead = r.project ? `<span>โครงการ ${esc(r.project)}</span>` : "";
 
-  // Chunk items into pages
-  const PER_PAGE = 4;
-  const pages = [];
-  let cur = [];
-  let cnt = 0;
-  let itemNo = 0;
-  (r.floors||[]).forEach(f => {
-    cur.push({type:"floor", name:f.name});
-    (f.items||[]).forEach(it => {
-      itemNo++;
-      cur.push({type:"item", it, no:itemNo});
-      cnt++;
-      if(cnt >= PER_PAGE){ pages.push(cur); cur = []; cnt = 0; }
-    });
-  });
-  if(cur.length) pages.push(cur);
+  let bodyPages = "";
 
-  const bodyPages = pages.map(page => {
-    const rows = page.map(row => {
-      if(row.type === "floor"){
-        return `<tr class="floor-row"><td colspan="7">${esc(row.name)}</td></tr>`;
-      }
-      const it = row.it;
-      const done = it.status === "done";
-      return `<tr>
-        <td class="col-no">${row.no}</td>
-        <td class="row-detail">${esc(it.detail||"")}</td>
-        <td class="row-img">${it.before ? `<img src="${it.before}">` : ""}</td>
-        <td class="row-img">${it.after ? `<img src="${it.after}">` : ""}</td>
-        <td class="col-stat"><span class="stat-mark">${done?'✓':''}</span></td>
-        <td class="col-stat"><span class="stat-mark stat-pending">${!done?'✓':''}</span></td>
-        <td class="row-detail">${esc(it.note||"")}</td>
-      </tr>`;
-    }).join("");
-    return `<div class="doc-page">
-      <div class="doc-header">
-        <img src="${window.LOGO_JMP}" alt="JM">
-        <div class="prj">${projectHead}</div>
-      </div>
-      <table class="def-tbl">
+  if(isPhotoMode){
+    // ── Photo grid mode: group by floor, 6 photos per page in 3×2 grid ──
+    (r.floors||[]).forEach(f => {
+      const items = (f.items||[]).filter(it => it.before);  // only items with photo
+      const PER = 6;
+      const chunks = [];
+      for(let i=0; i<items.length; i+=PER) chunks.push(items.slice(i, i+PER));
+      if(!chunks.length) chunks.push([]);
+      chunks.forEach(chunk => {
+        bodyPages += `<div class="doc-page photo-page">
+          <div class="photo-hd">
+            <img src="${window.LOGO_JMP}" alt="JM" class="ph-logo">
+            <div class="photo-title-box">
+              ${esc(r.title||"")}<br>
+              <b>${esc(f.name)}</b>
+            </div>
+          </div>
+          <div class="photo-grid">
+            ${chunk.map(it => `
+              <div class="photo-cell">
+                <div class="ph-img"><img src="${it.before}" alt=""></div>
+                ${it.detail ? `<div class="ph-cap">${esc(it.detail)}</div>` : ""}
+                ${it.note ? `<div class="ph-note">${esc(it.note)}</div>` : ""}
+              </div>
+            `).join("")}
+          </div>
+        </div>`;
+      });
+    });
+  } else {
+    // ── Defect/Handover table mode ──
+    const PER_PAGE = 4;
+    const pages = [];
+    let cur = [];
+    let cnt = 0;
+    let itemNo = 0;
+    (r.floors||[]).forEach(f => {
+      cur.push({type:"floor", name:f.name});
+      (f.items||[]).forEach(it => {
+        itemNo++;
+        cur.push({type:"item", it, no:itemNo});
+        cnt++;
+        if(cnt >= PER_PAGE){ pages.push(cur); cur = []; cnt = 0; }
+      });
+    });
+    if(cur.length) pages.push(cur);
+
+    bodyPages = pages.map(page => {
+      const rows = page.map(row => {
+        if(row.type === "floor"){
+          return `<tr class="floor-row"><td colspan="${cols}">${esc(row.name)}</td></tr>`;
+        }
+        const it = row.it;
+        const done = it.status === "done";
+        if(isHandover){
+          return `<tr>
+            <td class="col-no">${row.no}</td>
+            <td class="row-detail">${esc(it.detail||"")}</td>
+            <td class="row-img">${it.before ? `<img src="${it.before}">` : ""}</td>
+            <td class="row-img">${it.after ? `<img src="${it.after}">` : ""}</td>
+            <td class="row-detail">${esc(it.note||"")}</td>
+          </tr>`;
+        }
+        return `<tr>
+          <td class="col-no">${row.no}</td>
+          <td class="row-detail">${esc(it.detail||"")}</td>
+          <td class="row-img">${it.before ? `<img src="${it.before}">` : ""}</td>
+          <td class="row-img">${it.after ? `<img src="${it.after}">` : ""}</td>
+          <td class="col-stat"><span class="stat-mark">${done?'✓':''}</span></td>
+          <td class="col-stat"><span class="stat-mark stat-pending">${!done?'✓':''}</span></td>
+          <td class="row-detail">${esc(it.note||"")}</td>
+        </tr>`;
+      }).join("");
+
+      const thead = isHandover ? `
+        <thead>
+          <tr>
+            <th class="col-no">ลำดับ</th>
+            <th class="col-detail">${detailColLabel}</th>
+            <th class="col-img">รูปภาพก่อนทำ</th>
+            <th class="col-img">รูปภาพหลังทำ</th>
+            <th class="col-note">หมายเหตุ</th>
+          </tr>
+        </thead>` : `
         <thead>
           <tr>
             <th class="col-no" rowspan="2">ลำดับ</th>
-            <th class="col-detail" rowspan="2">รายละเอียดงาน</th>
+            <th class="col-detail" rowspan="2">${detailColLabel}</th>
             <th class="col-img" rowspan="2">รูปภาพก่อนทำ</th>
             <th class="col-img" rowspan="2">รูปภาพหลังทำ</th>
             <th colspan="2">สถานะงาน</th>
@@ -713,11 +825,17 @@ function renderDefectDoc(r){
             <th class="col-stat">แล้ว<br>เสร็จ</th>
             <th class="col-stat">คง<br>ค้าง</th>
           </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-  }).join("");
+        </thead>`;
+
+      return `<div class="doc-page">
+        <div class="doc-header">
+          <img src="${window.LOGO_JMP}" alt="JM">
+          <div class="prj">${projectHead}</div>
+        </div>
+        <table class="def-tbl">${thead}<tbody>${rows}</tbody></table>
+      </div>`;
+    }).join("");
+  }
 
   // Signature page
   const signPage = `<div class="doc-page">
