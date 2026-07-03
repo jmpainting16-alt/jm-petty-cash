@@ -53,6 +53,31 @@ h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
 .submit-btn { width: 100%; max-width: 400px; padding: 16px; background: linear-gradient(135deg, #1B2A5B, #243668); color: #fff; border: none; border-radius: 16px; font-size: 16px; font-weight: 600; font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif; cursor: pointer; margin-bottom: 12px; }
 .submit-btn:disabled { background: #ccc; cursor: default; }
 
+/* Leave request button + modal */
+.leave-btn { width: 100%; max-width: 400px; padding: 14px; background: #fff; color: #1B2A5B; border: 1.5px solid #E5DFCE; border-radius: 14px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.leave-btn:hover { border-color: #B8894A; background: #FAF7F0; }
+
+.leave-modal-bg { display: none; position: fixed; inset: 0; background: rgba(15,24,54,.55); z-index: 900; align-items: flex-end; justify-content: center; padding: 0; backdrop-filter: blur(4px); }
+.leave-modal-bg.show { display: flex; }
+.leave-modal { background: #fff; width: 100%; max-width: 440px; border-radius: 24px 24px 0 0; padding: 20px 20px 28px; max-height: 92vh; overflow-y: auto; animation: slideUp .3s cubic-bezier(.2,.9,.3,1); }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.leave-modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: #1B2A5B; }
+.leave-modal .sub { font-size: 13px; color: #6B7280; margin-bottom: 18px; }
+.leave-modal label { display: block; font-size: 13px; color: #4A5568; margin-bottom: 6px; font-weight: 500; margin-top: 12px; }
+.leave-modal select, .leave-modal input, .leave-modal textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #E5DFCE; border-radius: 12px; font-size: 16px; font-family: inherit; color: #0F1836; background: #FAF7F0; outline: none; }
+.leave-modal textarea { min-height: 80px; resize: vertical; }
+.leave-modal select:focus, .leave-modal input:focus, .leave-modal textarea:focus { border-color: #1B2A5B; background: #fff; }
+.leave-type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.leave-type-btn { padding: 12px 8px; border: 1.5px solid #E5DFCE; border-radius: 12px; background: #FAF7F0; text-align: center; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: #4A5568; transition: .15s; }
+.leave-type-btn.selected { border-color: #1B2A5B; background: linear-gradient(135deg, #1B2A5B, #243668); color: #fff; }
+.leave-type-btn .ic { font-size: 20px; display: block; margin-bottom: 4px; }
+.leave-actions { display: flex; gap: 8px; margin-top: 20px; }
+.leave-actions button { flex: 1; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; }
+.leave-cancel { background: #FAF7F0; color: #6B7280; border: 1.5px solid #E5DFCE !important; }
+.leave-submit { background: linear-gradient(135deg, #1B2A5B, #243668); color: #fff; }
+.leave-submit:disabled { background: #ccc; cursor: default; }
+.date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
 /* Active sessions list */
 .sessions-wrap { width: 100%; max-width: 400px; margin-bottom: 12px; }
 .session-card { background: #fff; border-radius: 16px; padding: 16px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 10px; border-left: 4px solid #4ade80; }
@@ -142,6 +167,54 @@ h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
 
 <button class="submit-btn" id="submit-btn" onclick="submitCheckin()" disabled>เช็คอินเข้างาน</button>
 
+<button class="leave-btn" onclick="openLeaveModal()">
+  <span>📝</span> ขอลา (ลาป่วย / ลากิจ / อื่นๆ)
+</button>
+
+<!-- Leave request modal -->
+<div class="leave-modal-bg" id="leave-modal-bg" onclick="if(event.target===this)closeLeaveModal()">
+  <div class="leave-modal">
+    <h2>📝 ขออนุมัติวันลา</h2>
+    <div class="sub">คำขอจะถูกส่งไปให้เจ้าของ/ผู้จัดการอนุมัติ</div>
+
+    <label>ผู้ขอลา *</label>
+    <select id="leave-member">
+      <option value="">-- เลือกชื่อ --</option>
+    </select>
+
+    <label>ประเภทการลา *</label>
+    <div class="leave-type-grid">
+      <button type="button" class="leave-type-btn" data-type="sick" onclick="selectLeaveType('sick')">
+        <span class="ic">🤒</span>ลาป่วย
+      </button>
+      <button type="button" class="leave-type-btn" data-type="personal" onclick="selectLeaveType('personal')">
+        <span class="ic">📋</span>ลากิจ
+      </button>
+      <button type="button" class="leave-type-btn" data-type="vacation" onclick="selectLeaveType('vacation')">
+        <span class="ic">🏖</span>พักร้อน
+      </button>
+      <button type="button" class="leave-type-btn" data-type="other" onclick="selectLeaveType('other')">
+        <span class="ic">📌</span>อื่นๆ
+      </button>
+    </div>
+    <input type="hidden" id="leave-type" />
+
+    <label>ช่วงวันที่ลา *</label>
+    <div class="date-row">
+      <input type="date" id="leave-start"/>
+      <input type="date" id="leave-end"/>
+    </div>
+
+    <label>เหตุผล *</label>
+    <textarea id="leave-reason" placeholder="เช่น ไปหาหมอ, ธุระครอบครัว..."></textarea>
+
+    <div class="leave-actions">
+      <button class="leave-cancel" onclick="closeLeaveModal()">ยกเลิก</button>
+      <button class="leave-submit" id="leave-submit-btn" onclick="submitLeaveRequest()">ส่งคำขอ</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="overlay">
   <div class="spinner"></div>
   <div class="overlay-text" id="overlay-text">กำลังบันทึก...</div>
@@ -195,6 +268,17 @@ db.ref("members").on("value", function(snap) {
     opt.textContent = m.name + (m.position ? " (" + m.position + ")" : "");
     sel.appendChild(opt);
   });
+  // sync leave modal
+  var leaveSel = document.getElementById("leave-member");
+  if(leaveSel){
+    leaveSel.innerHTML = '<option value="">-- เลือกชื่อ --</option>';
+    MEMBERS.forEach(function(m) {
+      var opt = document.createElement("option");
+      opt.value = m.key;
+      opt.textContent = m.name + (m.position ? " (" + m.position + ")" : "");
+      leaveSel.appendChild(opt);
+    });
+  }
 });
 
 db.ref("sites").on("value", function(snap) {
@@ -517,6 +601,89 @@ function showToast(msg) {
   var t = document.getElementById("toast");
   t.textContent=msg; t.classList.add("show");
   clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove("show");},3500);
+}
+
+// ── LEAVE REQUEST ────────────────────────
+var selectedLeaveType = null;
+
+function openLeaveModal() {
+  selectedLeaveType = null;
+  document.querySelectorAll(".leave-type-btn").forEach(function(b){ b.classList.remove("selected"); });
+  document.getElementById("leave-type").value = "";
+  document.getElementById("leave-member").value = "";
+  document.getElementById("leave-reason").value = "";
+  var today = new Date().toISOString().slice(0, 10);
+  document.getElementById("leave-start").value = today;
+  document.getElementById("leave-end").value = today;
+  document.getElementById("leave-modal-bg").classList.add("show");
+}
+
+function closeLeaveModal() {
+  document.getElementById("leave-modal-bg").classList.remove("show");
+}
+
+function selectLeaveType(type) {
+  selectedLeaveType = type;
+  document.getElementById("leave-type").value = type;
+  document.querySelectorAll(".leave-type-btn").forEach(function(b) {
+    b.classList.toggle("selected", b.dataset.type === type);
+  });
+}
+
+function submitLeaveRequest() {
+  var memberKey = document.getElementById("leave-member").value;
+  var type = document.getElementById("leave-type").value;
+  var start = document.getElementById("leave-start").value;
+  var end = document.getElementById("leave-end").value;
+  var reason = document.getElementById("leave-reason").value.trim();
+
+  if (!memberKey) { showToast("⚠️ กรุณาเลือกชื่อ"); return; }
+  if (!type) { showToast("⚠️ กรุณาเลือกประเภทการลา"); return; }
+  if (!start || !end) { showToast("⚠️ กรุณาเลือกวันที่"); return; }
+  if (new Date(start) > new Date(end)) { showToast("⚠️ วันเริ่มต้องก่อนวันสิ้นสุด"); return; }
+  if (!reason) { showToast("⚠️ กรุณากรอกเหตุผล"); return; }
+
+  var member = MEMBERS.find(function(m){ return m.key === memberKey; });
+  var memberName = member ? member.name : "";
+  var memberTel = member ? (member.tel || "") : "";
+
+  var btn = document.getElementById("leave-submit-btn");
+  btn.disabled = true;
+  btn.textContent = "กำลังส่ง...";
+
+  var typeLabels = { sick: "ลาป่วย", personal: "ลากิจ", vacation: "พักร้อน", other: "อื่นๆ" };
+
+  // นับจำนวนวัน
+  var d1 = new Date(start), d2 = new Date(end);
+  var days = Math.round((d2 - d1) / 86400000) + 1;
+
+  var request = {
+    memberKey: memberKey,
+    memberName: memberName,
+    memberTel: memberTel,
+    type: type,
+    typeLabel: typeLabels[type] || type,
+    startDate: start,
+    endDate: end,
+    days: days,
+    reason: reason,
+    status: "pending",     // pending | approved | rejected
+    requestedAt: firebase.database.ServerValue.TIMESTAMP,
+    approvedBy: null,
+    approvedAt: null
+  };
+
+  db.ref("leaves").push(request).then(function() {
+    btn.disabled = false;
+    btn.textContent = "ส่งคำขอ";
+    closeLeaveModal();
+    showToast("✅ ส่งคำขอลาแล้ว รอการอนุมัติ");
+    notifyLine("📝 คำขอลาใหม่\n👷 "+memberName+(memberTel?" ("+memberTel+")":"")+"\n📅 "+typeLabels[type]+" "+days+" วัน\n🗓️ "+start+(start!==end?" ถึง "+end:"")+"\n📌 "+reason);
+  }).catch(function(err) {
+    btn.disabled = false;
+    btn.textContent = "ส่งคำขอ";
+    showToast("❌ " + err.message);
+  });
 }
 </script>
 </body>
