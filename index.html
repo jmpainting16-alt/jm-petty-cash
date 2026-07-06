@@ -665,7 +665,7 @@
         </div>
       </a>
 
-      <a class="app" href="payment.html">
+      <a class="app" href="payment.html" data-position-blocked="โฟร์แมน,วิศวกร,foreman,engineer">
         <span class="app-badge new">พร้อมใช้</span>
         <div class="app-icon" style="background:linear-gradient(135deg,#15803D,#0F5F2B);color:#fff">💰</div>
         <div class="app-title">ทำจ่ายผู้รับเหมา</div>
@@ -1215,6 +1215,15 @@ function showHub(sess){
   document.querySelectorAll("[data-role-required]").forEach(el => {
     const allowed = el.getAttribute("data-role-required").split(",").map(s=>s.trim());
     if(!allowed.includes(sess.role)){
+      el.style.display = "none";
+    }
+  });
+
+  // ซ่อนการ์ดที่ตำแหน่งถูกบล็อค
+  document.querySelectorAll("[data-position-blocked]").forEach(el => {
+    const blocked = el.getAttribute("data-position-blocked").split(",").map(s=>s.trim().toLowerCase());
+    const pos = (sess.position || "").toLowerCase();
+    if(blocked.some(b => pos.indexOf(b) >= 0)){
       el.style.display = "none";
     }
   });
