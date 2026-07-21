@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1B2A5B">
+<title>ทะเบียนคุมเช็ค — JMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>window.LOGO_JMP = "data:image/jpeg;base64,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";</script>
+<style>
+  :root{
+    --bg:#F5F2EB;--surface:#FFFFFF;--surface-2:#FAF7F0;
+    --line:#E5DFCE;--ink:#0F1836;--muted:#6B7280;
+    --navy:#1B2A5B;--navy-2:#243668;--navy-3:#0F1836;--navy-soft:#E4E8F2;
+    --gold:#B8894A;--gold-2:#D4A574;--gold-3:#9E7239;--gold-soft:#F5EDD9;
+    --success:#15803D;--success-soft:#E4F0E5;
+    --danger:#B4421F;--danger-soft:#FBEAE3;
+    --warn:#B45309;--warn-soft:#FDF1DE;
+    --info:#1E4B7A;--info-soft:#DFEBF6;
+    --yellow:#FFCE3A;
+    --shadow:0 1px 2px rgba(15,24,54,.06),0 6px 18px rgba(15,24,54,.06);
+    --shadow-lg:0 4px 8px rgba(15,24,54,.08),0 16px 32px rgba(15,24,54,.10);
+    --font:'IBM Plex Sans Thai','Sarabun',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--font);min-height:100vh;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer;border:0}
+  a{color:inherit;text-decoration:none}
+  input,select,textarea{font-family:inherit}
+
+  .top{position:sticky;top:0;z-index:30;background:rgba(245,242,235,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:12px 0}
+  .top-in{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:12px}
+  .back-btn{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--line);color:var(--navy);display:inline-flex;align-items:center;gap:6px}
+  .top-title{font-weight:700;font-size:16px;color:var(--navy);flex:1}
+  .top-title span{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.15em;text-transform:uppercase;display:block}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:20px}
+  .btn{padding:9px 14px;border-radius:9px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap}
+  .btn-primary{background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;box-shadow:0 2px 6px rgba(27,42,91,.20)}
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-3));color:#fff}
+  .btn-danger{background:var(--danger-soft);color:var(--danger)}
+  .btn-success{background:var(--success);color:#fff}
+  .btn-sm{padding:6px 11px;font-size:12px}
+
+  .sum-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+  .sum-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .sum-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--navy)}
+  .sum-card.gold:before{background:var(--gold)}
+  .sum-card.success:before{background:var(--success)}
+  .sum-card.warn:before{background:var(--warn)}
+  .sum-card.danger:before{background:var(--danger)}
+  .sum-card .lbl{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+  .sum-card .val{font-size:20px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
+  .sum-card .sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+  .tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:18px;overflow-x:auto}
+  .tab-btn{padding:10px 18px;background:transparent;color:var(--muted);font-weight:600;font-size:14px;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+  .tab-btn:hover{color:var(--navy)}
+  .tab-btn.active{color:var(--navy);border-bottom-color:var(--gold)}
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+  .toolbar .search{flex:1;min-width:180px;position:relative}
+  .toolbar .search input{width:100%;padding:10px 14px 10px 36px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:14px;outline:none}
+  .toolbar .search:before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.5}
+  .toolbar select{padding:10px 14px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;font-size:13.5px}
+
+  /* Table view */
+  .chk-tbl-wrap{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:auto;box-shadow:var(--shadow)}
+  .chk-tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px}
+  .chk-tbl th{background:var(--navy);color:#fff;padding:10px 8px;font-weight:600;text-align:left;font-size:11.5px;letter-spacing:.02em;white-space:nowrap}
+  .chk-tbl td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+  .chk-tbl tr:hover td{background:var(--surface-2);cursor:pointer}
+  .chk-tbl .r{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .chk-tbl .c{text-align:center}
+
+  .status-badge{display:inline-flex;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+  .status-badge.pending{background:var(--warn-soft);color:var(--warn)}
+  .status-badge.delivered{background:var(--info-soft);color:var(--info)}
+  .status-badge.cleared{background:var(--success-soft);color:var(--success)}
+  .status-badge.bounced{background:var(--danger-soft);color:var(--danger)}
+  .status-badge.cancelled{background:#F5F2EB;color:#6B7280;text-decoration:line-through}
+
+  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty .ic{font-size:52px;margin-bottom:10px;opacity:.5}
+  .empty h3{color:var(--ink);margin-bottom:4px}
+
+  /* modal */
+  .mask{position:fixed;inset:0;background:rgba(15,24,54,.55);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+  .mask.show{display:flex}
+  .modal{background:var(--surface);border-radius:18px;box-shadow:var(--shadow-lg);width:100%;max-width:760px;max-height:94vh;overflow:hidden;display:flex;flex-direction:column}
+  .modal-hd{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .modal-hd h3{font-size:16px;font-weight:700;color:var(--navy);flex:1;min-width:180px}
+  .modal-x{width:32px;height:32px;border-radius:8px;background:var(--surface-2);color:var(--muted);display:grid;place-items:center;font-size:18px}
+  .modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+  .modal-ft{padding:12px 20px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;background:var(--surface-2);flex-wrap:wrap}
+
+  .fld{margin-bottom:12px}
+  .fld label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:5px}
+  .fld input,.fld textarea,.fld select{width:100%;padding:10px 12px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:10px;font-size:14px;color:var(--ink);outline:none;font-family:inherit}
+  .fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px var(--navy-soft)}
+  .fld textarea{min-height:60px;resize:vertical}
+  .fld-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fld-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+  .type-picker{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .type-picker label{cursor:pointer;padding:14px;border:2px solid var(--line);border-radius:12px;background:var(--surface-2);text-align:center;transition:.15s;font-weight:600}
+  .type-picker label:has(input:checked){border-color:var(--navy);background:var(--navy-soft)}
+  .type-picker .ic{font-size:28px;display:block;margin-bottom:6px}
+  .type-picker input{display:none}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:500;box-shadow:var(--shadow-lg);z-index:200;display:none}
+  .toast.show{display:block}
+  .toast.ok{background:var(--success)}
+  .toast.err{background:var(--danger)}
+
+  /* PDF register (landscape) */
+  .report-doc{background:#fff;color:#0F1836;font-family:'Sarabun',sans-serif;margin:0 auto}
+  .reg-page{padding:16px 20px;background:#fff;width:1400px;min-height:900px;display:flex;flex-direction:column}
+  .reg-head{
+    display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+    background:#0F1836;color:#fff;padding:14px 20px;border-radius:8px 8px 0 0;margin-bottom:0;
+  }
+  .reg-head .brand{display:flex;align-items:center;gap:10px}
+  .reg-head .brand img{height:48px;filter:brightness(0) invert(1)}
+  .reg-head .brand .co{font-size:13px;line-height:1.3}
+  .reg-head .brand .co-en{font-size:10px;letter-spacing:.05em;opacity:.85}
+  .reg-head .title{text-align:center}
+  .reg-head .title h1{font-size:24px;font-weight:900;letter-spacing:.06em}
+  .reg-head .title h2{font-size:12px;font-weight:600;letter-spacing:.15em;opacity:.9;margin-top:2px}
+  .reg-head .side{background:#FFCE3A;color:#0F1836;padding:8px 14px;border-radius:6px;font-weight:900;font-size:13px;text-align:center;line-height:1.2}
+  .reg-head .side small{font-weight:600;font-size:10px;display:block;margin-top:2px}
+
+  .reg-meta{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:10px 20px;
+    padding:10px 16px;background:#F5F2EB;border-left:1px solid #C8C1AE;border-right:1px solid #C8C1AE;
+    font-size:12px;
+  }
+  .reg-meta .k{color:#6B7280;font-weight:600}
+  .reg-meta .v{color:#0F1836;font-weight:700;margin-left:6px}
+
+  .reg-tbl{width:100%;border-collapse:collapse;font-size:11px;table-layout:auto}
+  .reg-tbl th,.reg-tbl td{border:1px solid #999;padding:5px 6px;vertical-align:middle}
+  .reg-tbl th{background:#0F1836;color:#fff;font-weight:700;font-size:10.5px;text-align:center;line-height:1.3}
+  .reg-tbl td{background:#fff;text-align:left}
+  .reg-tbl td.r{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .reg-tbl td.c{text-align:center}
+  .reg-tbl tr.sum td{background:#F5EDD9;font-weight:800;font-size:12px}
+  .reg-tbl .st-cleared{background:#E4F0E5!important;color:#15803D;font-weight:700}
+  .reg-tbl .st-pending{background:#FDF1DE!important;color:#B45309;font-weight:700}
+  .reg-tbl .st-delivered{background:#DFEBF6!important;color:#1E4B7A;font-weight:700}
+  .reg-tbl .st-bounced{background:#FBEAE3!important;color:#B4421F;font-weight:700}
+  .reg-tbl .st-cancelled{background:#FBEAE3!important;color:#B4421F;font-weight:700;text-decoration:line-through}
+
+  .reg-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px}
+  .reg-sum-box{border:1px solid #C8C1AE;border-radius:4px;overflow:hidden}
+  .reg-sum-box .hd{background:#0F1836;color:#fff;padding:5px 10px;font-size:11.5px;font-weight:700;text-align:center}
+  .reg-sum-box table{width:100%;border-collapse:collapse;font-size:11px}
+  .reg-sum-box th,.reg-sum-box td{border:1px solid #C8C1AE;padding:4px 6px}
+  .reg-sum-box th{background:#F5F2EB;font-weight:700;font-size:10.5px}
+
+  .reg-sign{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px;font-size:11px}
+  .reg-sign .sc{text-align:center}
+  .reg-sign .sc .role{font-weight:700;color:#0F1836}
+  .reg-sign .sc .line{border-bottom:1px solid #333;margin:24px 20px 4px;height:1em}
+  .reg-sign .sc .name{font-weight:600;margin-top:2px}
+  .reg-sign .sc .role2{font-size:10.5px;color:#6B7280;margin-top:1px}
+  .reg-sign .sc .dt{font-size:10.5px;color:#6B7280;margin-top:2px}
+
+  .reg-note{
+    background:#FAF7F0;border:1px solid #E5DFCE;border-radius:4px;
+    padding:8px 12px;font-size:11px;margin-top:12px;line-height:1.55;
+  }
+
+  .reg-foot{margin-top:auto;padding-top:8px;border-top:1px solid #E5DFCE;display:flex;justify-content:space-between;font-size:10px;color:#6B7280}
+
+  /* Cheque receipt (portrait) */
+  .rcpt-page{padding:24px 28px;background:#fff;width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Sarabun',sans-serif}
+  .rcpt-hd{background:#0F1836;color:#fff;padding:16px 20px;position:relative;overflow:hidden}
+  .rcpt-hd::before{content:"";position:absolute;top:0;left:0;width:35%;height:100%;background:#FFCE3A;clip-path:polygon(0 0,100% 0,80% 100%,0 100%)}
+  .rcpt-hd .rl{position:relative;display:flex;align-items:center;gap:16px}
+  .rcpt-hd img{height:44px;filter:brightness(0)}
+  .rcpt-hd .co{font-size:12px;line-height:1.3;color:#0F1836;font-weight:700}
+  .rcpt-hd .co small{font-size:10px;opacity:.8}
+  .rcpt-hd .title{position:absolute;right:24px;top:50%;transform:translateY(-50%);text-align:right;color:#fff}
+  .rcpt-hd .title h1{font-size:22px;font-weight:900;letter-spacing:.08em}
+  .rcpt-hd .title h2{font-size:10px;font-weight:600;letter-spacing:.2em;opacity:.9}
+
+  .rcpt-body{padding:20px 6px;flex:1;font-size:13px;line-height:1.9}
+  .rcpt-body .row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+  .rcpt-body .k{color:#6B7280;font-weight:600;min-width:130px}
+  .rcpt-body .v{flex:1;border-bottom:1px dotted #999;padding-bottom:2px}
+  .rcpt-body h3{font-size:13px;font-weight:700;color:#0F1836;margin:14px 0 8px;padding-bottom:4px;border-bottom:2px solid #FFCE3A}
+
+  .rcpt-signs{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:auto;padding-top:20px;font-size:12px}
+  .rcpt-signs .sc{text-align:center;padding:14px;border:1px dashed #999;border-radius:6px}
+  .rcpt-signs .sc .role{font-weight:700;color:#0F1836;margin-bottom:20px}
+  .rcpt-signs .sc .line{border-bottom:1px solid #333;margin:0 20px 4px}
+  .rcpt-signs .sc .co{font-size:10px;color:#6B7280;margin-top:2px}
+
+  .brand-foot{background:#0F1836;color:#FFCE3A;padding:8px 14px;font-weight:700;font-size:11px;margin-top:14px;text-align:center;border-radius:4px}
+
+  @media(max-width:520px){
+    .fld-row,.fld-3{grid-template-columns:1fr}
+    .type-picker{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="back-btn" href="index.html">← กลับ</a>
+    <div class="top-title">
+      <span>Cheque Register</span>ทะเบียนคุมเช็ค
+    </div>
+    <button class="btn btn-primary" onclick="openCheckModal()">➕ บันทึกเช็ค</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="sum-strip" id="sumStrip"></div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="out" onclick="switchTab('out')">💸 เช็คจ่ายออก</button>
+    <button class="tab-btn" data-tab="in" onclick="switchTab('in')">💰 เช็ครับเข้า</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search"><input id="searchInput" placeholder="ค้นหาเลขเช็ค / ผู้รับ / โครงการ..." oninput="renderList()"/></div>
+    <select id="filterMonth" onchange="renderList()">
+      <option value="all">ทุกเดือน</option>
+    </select>
+    <select id="filterStatus" onchange="renderList()">
+      <option value="all">ทุกสถานะ</option>
+      <option value="pending">รอขึ้นเงิน</option>
+      <option value="delivered">มอบแล้ว</option>
+      <option value="cleared">ขึ้นเงินแล้ว</option>
+      <option value="bounced">เช็คเด้ง</option>
+      <option value="cancelled">ยกเลิก</option>
+    </select>
+    <button class="btn btn-gold" onclick="exportRegisterPDF()">📄 พิมพ์ทะเบียน</button>
+  </div>
+
+  <div id="listWrap"></div>
+</div>
+
+<!-- Check Modal -->
+<div class="mask" id="checkModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3 id="checkModalTitle">➕ บันทึกเช็ค</h3>
+      <button class="modal-x" onclick="closeMask('checkModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fld"><label>ประเภทเช็ค *</label>
+        <div class="type-picker">
+          <label><input type="radio" name="cType" value="out" checked/><span><span class="ic">💸</span>จ่ายออก</span></label>
+          <label><input type="radio" name="cType" value="in"/><span><span class="ic">💰</span>รับเข้า</span></label>
+        </div>
+      </div>
+
+      <div class="fld-row">
+        <div class="fld"><label>เลขที่เช็ค *</label><input id="cCheckNo" placeholder="เช่น 0001234"/></div>
+        <div class="fld"><label>วันที่ในเช็ค *</label><input id="cCheckDate" type="date"/></div>
+      </div>
+
+      <div class="fld-row">
+        <div class="fld"><label>ธนาคาร *</label>
+          <input id="cBank" list="bankList" placeholder="เลือกธนาคาร"/>
+          <datalist id="bankList">
+            <option value="ธนาคารกสิกรไทย จำกัด (มหาชน)">
+            <option value="ธนาคารไทยพาณิชย์ จำกัด (มหาชน)">
+            <option value="ธนาคารกรุงเทพ จำกัด (มหาชน)">
+            <option value="ธนาคารกรุงไทย จำกัด (มหาชน)">
+            <option value="ธนาคารกรุงศรีอยุธยา จำกัด (มหาชน)">
+            <option value="ธนาคารทหารไทยธนชาต จำกัด (มหาชน)">
+            <option value="ธนาคารออมสิน">
+            <option value="ธนาคาร ธ.ก.ส.">
+            <option value="ธนาคารซีไอเอ็มบีไทย (CIMB)">
+            <option value="ธนาคารยูโอบี (UOB)">
+          </datalist>
+        </div>
+        <div class="fld"><label>สาขา</label><input id="cBranch" placeholder="เช่น บางบ่อ"/></div>
+      </div>
+
+      <div class="fld"><label>เลขที่บัญชี</label><input id="cAcctNo" placeholder="xxx-x-xxxxx-x"/></div>
+
+      <div class="fld"><label id="cPayeeLabel">ผู้รับเช็ค / Payee *</label>
+        <input id="cPayee" list="partyList" placeholder="พิมพ์ชื่อผู้รับ / บริษัท"/>
+        <datalist id="partyList"></datalist>
+      </div>
+
+      <div class="fld-row">
+        <div class="fld"><label>จำนวนเงิน (บาท) *</label><input id="cAmount" type="number" min="0" step="0.01" placeholder="0.00" oninput="recalcNetCheck()"/></div>
+        <div class="fld"><label>หัก ณ ที่จ่าย (บาท)</label><input id="cWht" type="number" min="0" step="0.01" placeholder="0.00" value="0" oninput="recalcNetCheck()"/></div>
+      </div>
+
+      <div style="padding:8px 12px;background:var(--navy-soft);border-radius:8px;font-size:13px;margin-bottom:12px;text-align:right">
+        <span style="color:var(--muted)">จำนวนเงินสุทธิ: </span>
+        <b id="cNetAmount" style="color:var(--navy);font-size:16px;font-variant-numeric:tabular-nums">0.00</b>
+        <span> บาท</span>
+      </div>
+
+      <div class="fld"><label>รายการ / คำอธิบาย *</label>
+        <input id="cDescription" list="descList" placeholder="เช่น ค่าวัสดุก่อสร้าง"/>
+        <datalist id="descList">
+          <option value="ค่าวัสดุก่อสร้าง">
+          <option value="ค่าวัสดุสิ้นเปลือง">
+          <option value="ค่าแรงงาน">
+          <option value="ค่าอุปกรณ์หน้างาน">
+          <option value="ค่าเช่าอุปกรณ์">
+          <option value="ค่าน้ำมันเชื้อเพลิง">
+          <option value="ค่าใช้จ่ายสำนักงาน">
+          <option value="เงินมัดจำ">
+          <option value="ค่าบริการอื่นๆ">
+        </datalist>
+      </div>
+
+      <div class="fld-row">
+        <div class="fld"><label>รหัสโครงการ</label><input id="cProjectCode" list="projCodeList" placeholder="เช่น KBR001"/><datalist id="projCodeList"></datalist></div>
+        <div class="fld"><label>ชื่อโครงการ</label><input id="cProjectName" list="projNameList" placeholder="ชื่อโครงการ"/><datalist id="projNameList"></datalist></div>
+      </div>
+
+      <div class="fld-row">
+        <div class="fld"><label>เลขใบสำคัญจ่าย (PV No.)</label><input id="cPvNo" placeholder="PV6705-001"/></div>
+        <div class="fld"><label>เลขใบแจ้งหนี้ (Invoice No.)</label><input id="cInvoiceNo" placeholder="INV-6705-001"/></div>
+      </div>
+
+      <div class="fld-row">
+        <div class="fld"><label>สถานะ *</label>
+          <select id="cStatus" onchange="onStatusChange()">
+            <option value="pending">รอขึ้นเงิน</option>
+            <option value="delivered">มอบแล้ว</option>
+            <option value="cleared">ขึ้นเงินแล้ว</option>
+            <option value="bounced">เช็คเด้ง</option>
+            <option value="cancelled">ยกเลิก</option>
+          </select>
+        </div>
+        <div class="fld"><label>วันที่ขึ้นเงิน</label><input id="cClearedDate" type="date"/></div>
+      </div>
+
+      <div class="fld"><label>ผู้อนุมัติ</label><input id="cApprovedBy" placeholder="ชื่อผู้อนุมัติ"/></div>
+      <div class="fld"><label>หมายเหตุ</label><textarea id="cNote"></textarea></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-danger" id="checkDeleteBtn" onclick="deleteCheck()" style="display:none">🗑 ลบ</button>
+      <button class="btn btn-ghost" onclick="closeMask('checkModal')">ยกเลิก</button>
+      <button class="btn btn-primary" id="checkSaveBtn" onclick="saveCheck()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail / PDF preview modal -->
+<div class="mask" id="detailModal">
+  <div class="modal" style="max-width:920px">
+    <div class="modal-hd">
+      <h3 id="detailTitle">📄 รายละเอียดเช็ค</h3>
+      <button class="btn btn-gold btn-sm" onclick="exportReceiptPDF()">📄 PDF ใบรับเช็ค</button>
+      <button class="modal-x" onclick="closeMask('detailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody" style="background:#EDE7DA;padding:16px"></div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="editFromDetail()">✏️ แก้ไข</button>
+      <button class="btn btn-ghost" onclick="closeMask('detailModal')">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Register PDF Preview -->
+<div class="mask" id="registerModal">
+  <div class="modal" style="max-width:1440px;max-height:96vh">
+    <div class="modal-hd">
+      <h3>📊 ทะเบียนคุมเช็ค</h3>
+      <button class="btn btn-gold btn-sm" onclick="exportRegisterPDFNow()">📄 ดาวน์โหลด PDF</button>
+      <button class="modal-x" onclick="closeMask('registerModal')">✕</button>
+    </div>
+    <div class="modal-body" id="registerBody" style="background:#DDD;padding:12px"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, query, orderBy, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyBclAdfipl8Yd-1DAUYrF7nAipYYa5jsiM",
+  authDomain: "jm-petty-cash.firebaseapp.com",
+  projectId: "jm-petty-cash",
+  storageBucket: "jm-petty-cash.firebasestorage.app",
+  messagingSenderId: "797068440439",
+  appId: "1:797068440439:web:45f33067f044f6c7f86772"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+signInAnonymously(auth).catch(err => console.warn("Anon auth failed:", err));
+window.FB = { db, collection, doc, getDoc, getDocs, setDoc, deleteDoc, query, orderBy, serverTimestamp };
+window.dispatchEvent(new CustomEvent("fb-ready"));
+</script>
+
+<script>
+function getSession(){
+  try {
+    const raw = localStorage.getItem("jm_portal_session_v1");
+    if(!raw) return null;
+    const s = JSON.parse(raw);
+    if(!s || !s.expiresAt || Date.now() > s.expiresAt) return null;
+    return s;
+  } catch(e){ return null; }
+}
+const SESSION = getSession();
+if(!SESSION){ window.location.href = "index.html"; }
+
+// Block foremen/engineers
+(function guardRole(){
+  if(!SESSION) return;
+  var pos = (SESSION.position || "").toLowerCase();
+  var blocked = pos.indexOf("โฟร์แมน") >= 0 || pos.indexOf("วิศวกร") >= 0 ||
+                pos.indexOf("foreman") >= 0 || pos.indexOf("engineer") >= 0;
+  if(blocked){
+    document.body.innerHTML = '<div style="max-width:480px;margin:80px auto;padding:40px 24px;text-align:center;font-family:\'IBM Plex Sans Thai\',sans-serif">' +
+      '<div style="font-size:60px;margin-bottom:16px">🔒</div>' +
+      '<h2 style="color:#1B2A5B;font-size:20px;margin-bottom:8px">ไม่มีสิทธิ์เข้าใช้งาน</h2>' +
+      '<p style="color:#6B7280;font-size:14px;line-height:1.6;margin-bottom:24px">ระบบทะเบียนคุมเช็คสำหรับเจ้าของและเลขานุการผู้บริหารเท่านั้น</p>' +
+      '<a href="index.html" style="display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#1B2A5B,#243668);color:#fff;border-radius:10px;font-weight:600;text-decoration:none">← กลับหน้าหลัก</a>' +
+    '</div>';
+    throw new Error("Access denied");
+  }
+})();
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const fmtMoney = n => (+n||0).toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtDate = d => {
+  if(!d) return "-";
+  const dt = new Date(d);
+  const yy = String((dt.getFullYear()+543)).slice(2);
+  const mm = String(dt.getMonth()+1).padStart(2,"0");
+  const dd = String(dt.getDate()).padStart(2,"0");
+  return `${dd}/${mm}/${yy}`;
+};
+const monthLabel = ym => {
+  const [y,m] = ym.split("-");
+  const months = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+  return months[+m-1] + " " + (+y + 543);
+};
+
+function toast(msg, kind){
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (kind ? " " + kind : "");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+function openMask(id){ $(id).classList.add("show"); }
+function closeMask(id){ $(id).classList.remove("show"); }
+window.closeMask = closeMask;
+
+const COMPANY = {
+  logo: window.LOGO_JMP,
+  name: "บริษัท เจเอ็ม. เพ้นท์ติ้งแอนด์ซัพพลาย จำกัด",
+  nameEn: "JM. PAINTING AND SUPPLY CO., LTD.",
+  slogan: "ครบจบเรื่องงานโรยตัว"
+};
+
+function waitFB(){
+  return new Promise(res => {
+    if(window.FB){ res(window.FB); return; }
+    window.addEventListener("fb-ready", ()=>res(window.FB), {once:true});
+    setTimeout(()=>{ if(!window.FB) res(null); }, 8000);
+  });
+}
+
+const STATUS_LABEL = {
+  pending: "รอขึ้นเงิน",
+  delivered: "มอบแล้ว",
+  cleared: "ขึ้นเงินแล้ว",
+  bounced: "เช็คเด้ง",
+  cancelled: "ยกเลิก"
+};
+
+let CHECKS = [];
+let CURRENT_ID = null;
+let CURRENT_TAB = "out";
+
+async function loadAll(){
+  const FB = await waitFB();
+  if(!FB){ toast("เชื่อมต่อไม่ได้","err"); return; }
+  const snap = await FB.getDocs(FB.collection(FB.db, "checks"));
+  CHECKS = [];
+  snap.forEach(d => CHECKS.push({id:d.id, ...d.data()}));
+  CHECKS.sort((a,b) => new Date(b.checkDate||0) - new Date(a.checkDate||0));
+  renderAll();
+}
+
+function switchTab(tab){
+  CURRENT_TAB = tab;
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab===tab));
+  renderList();
+}
+window.switchTab = switchTab;
+
+function renderAll(){
+  fillMonthFilter();
+  fillPartyDatalists();
+  renderSummary();
+  renderList();
+}
+
+function fillMonthFilter(){
+  const months = new Set();
+  CHECKS.forEach(c => {
+    if(c.checkDate){
+      const ym = c.checkDate.slice(0,7);
+      months.add(ym);
+    }
+  });
+  const sorted = Array.from(months).sort().reverse();
+  const sel = $("filterMonth");
+  const cur = sel.value;
+  sel.innerHTML = '<option value="all">ทุกเดือน</option>' + sorted.map(ym => `<option value="${ym}">${monthLabel(ym)}</option>`).join("");
+  sel.value = cur || "all";
+}
+
+function fillPartyDatalists(){
+  const parties = new Set();
+  const projCodes = new Set();
+  const projNames = new Set();
+  CHECKS.forEach(c => {
+    if(c.payee) parties.add(c.payee);
+    if(c.projectCode) projCodes.add(c.projectCode);
+    if(c.projectName) projNames.add(c.projectName);
+  });
+  $("partyList").innerHTML = Array.from(parties).map(p => `<option value="${esc(p)}">`).join("");
+  $("projCodeList").innerHTML = Array.from(projCodes).map(p => `<option value="${esc(p)}">`).join("");
+  $("projNameList").innerHTML = Array.from(projNames).map(p => `<option value="${esc(p)}">`).join("");
+}
+
+function renderSummary(){
+  const filtered = CHECKS.filter(c => c.type === CURRENT_TAB);
+  const total = filtered.length;
+  const cleared = filtered.filter(c => c.status === "cleared").length;
+  const pending = filtered.filter(c => c.status === "pending" || c.status === "delivered").length;
+  const bounced = filtered.filter(c => c.status === "bounced" || c.status === "cancelled").length;
+  const sumCleared = filtered.filter(c => c.status === "cleared").reduce((s,c)=>s + (+c.amount - +(c.wht||0)), 0);
+  const sumPending = filtered.filter(c => c.status === "pending" || c.status === "delivered").reduce((s,c)=>s + (+c.amount - +(c.wht||0)), 0);
+  const grandTotal = filtered.reduce((s,c)=>s + (+c.amount - +(c.wht||0)), 0);
+
+  $("sumStrip").innerHTML = `
+    <div class="sum-card"><div class="lbl">เช็คทั้งหมด</div><div class="val">${total} ฉบับ</div><div class="sub">฿${fmtMoney(grandTotal)}</div></div>
+    <div class="sum-card success"><div class="lbl">ขึ้นเงินแล้ว</div><div class="val">${cleared} ฉบับ</div><div class="sub">฿${fmtMoney(sumCleared)}</div></div>
+    <div class="sum-card warn"><div class="lbl">รอขึ้นเงิน</div><div class="val">${pending} ฉบับ</div><div class="sub">฿${fmtMoney(sumPending)}</div></div>
+    <div class="sum-card danger"><div class="lbl">เด้ง / ยกเลิก</div><div class="val">${bounced} ฉบับ</div></div>
+  `;
+}
+
+function renderList(){
+  renderSummary();
+  const kw = $("searchInput").value.trim().toLowerCase();
+  const month = $("filterMonth").value;
+  const status = $("filterStatus").value;
+  let list = CHECKS.filter(c => c.type === CURRENT_TAB);
+  if(month !== "all") list = list.filter(c => (c.checkDate||"").startsWith(month));
+  if(status !== "all") list = list.filter(c => c.status === status);
+  if(kw){
+    list = list.filter(c => ((c.checkNo||"") + " " + (c.payee||"") + " " + (c.projectName||"") + " " + (c.projectCode||"")).toLowerCase().includes(kw));
+  }
+
+  const wrap = $("listWrap");
+  if(!list.length){
+    wrap.innerHTML = '<div class="empty"><div class="ic">📋</div><h3>ยังไม่มีเช็ค</h3><p>กด "บันทึกเช็ค" เพื่อเพิ่มรายการ</p></div>';
+    return;
+  }
+
+  const isOut = CURRENT_TAB === "out";
+  wrap.innerHTML = `<div class="chk-tbl-wrap"><table class="chk-tbl">
+    <thead><tr>
+      <th class="c">ลำดับ</th>
+      <th class="c">วันที่</th>
+      <th>เลขที่เช็ค</th>
+      <th>${isOut?"ผู้รับ (Payee)":"ผู้จ่าย (Payer)"}</th>
+      <th>รายการ</th>
+      <th>โครงการ</th>
+      <th class="r">จำนวนเงิน</th>
+      ${isOut?'<th class="r">WHT</th><th class="r">สุทธิ</th>':'<th class="r">สุทธิ</th>'}
+      <th class="c">วันที่ขึ้นเงิน</th>
+      <th class="c">สถานะ</th>
+    </tr></thead>
+    <tbody>
+      ${list.map((c, i) => {
+        const net = (+c.amount) - (+c.wht||0);
+        return `<tr onclick="openDetail('${c.id}')">
+          <td class="c">${i+1}</td>
+          <td class="c">${fmtDate(c.checkDate)}</td>
+          <td><b>${esc(c.checkNo||"-")}</b></td>
+          <td>${esc(c.payee||"-")}</td>
+          <td>${esc(c.description||"-")}</td>
+          <td>${c.projectCode?`<b>${esc(c.projectCode)}</b><br><span style="font-size:11px;color:var(--muted)">${esc(c.projectName||"")}</span>`:"-"}</td>
+          <td class="r">${fmtMoney(c.amount)}</td>
+          ${isOut?`<td class="r">${c.wht?fmtMoney(c.wht):"-"}</td>`:""}
+          <td class="r">${fmtMoney(net)}</td>
+          <td class="c">${c.clearedDate?fmtDate(c.clearedDate):"-"}</td>
+          <td class="c"><span class="status-badge ${c.status}">${STATUS_LABEL[c.status]||c.status}</span></td>
+        </tr>`;
+      }).join("")}
+    </tbody>
+  </table></div>`;
+}
+window.renderList = renderList;
+
+// ===== Check Modal =====
+function openCheckModal(editId){
+  CURRENT_ID = editId || null;
+  $("checkModalTitle").textContent = editId ? "✏️ แก้ไขเช็ค" : "➕ บันทึกเช็ค";
+  $("checkDeleteBtn").style.display = editId ? "" : "none";
+
+  if(editId){
+    const c = CHECKS.find(x => x.id === editId);
+    if(!c) return;
+    document.querySelector(`input[name="cType"][value="${c.type||"out"}"]`).checked = true;
+    $("cCheckNo").value = c.checkNo || "";
+    $("cCheckDate").value = c.checkDate || "";
+    $("cBank").value = c.bank || "";
+    $("cBranch").value = c.branch || "";
+    $("cAcctNo").value = c.acctNo || "";
+    $("cPayee").value = c.payee || "";
+    $("cAmount").value = c.amount || "";
+    $("cWht").value = c.wht || 0;
+    $("cDescription").value = c.description || "";
+    $("cProjectCode").value = c.projectCode || "";
+    $("cProjectName").value = c.projectName || "";
+    $("cPvNo").value = c.pvNo || "";
+    $("cInvoiceNo").value = c.invoiceNo || "";
+    $("cStatus").value = c.status || "pending";
+    $("cClearedDate").value = c.clearedDate || "";
+    $("cApprovedBy").value = c.approvedBy || SESSION.name || "";
+    $("cNote").value = c.note || "";
+  } else {
+    document.querySelector(`input[name="cType"][value="${CURRENT_TAB}"]`).checked = true;
+    ["cCheckNo","cCheckDate","cBank","cBranch","cAcctNo","cPayee","cAmount","cDescription","cProjectCode","cProjectName","cPvNo","cInvoiceNo","cClearedDate","cNote"].forEach(id => $(id).value = "");
+    $("cWht").value = 0;
+    $("cStatus").value = "pending";
+    $("cCheckDate").value = new Date().toISOString().slice(0,10);
+    $("cApprovedBy").value = SESSION.name || "";
+  }
+  updatePayeeLabel();
+  recalcNetCheck();
+  openMask("checkModal");
+}
+window.openCheckModal = openCheckModal;
+
+function updatePayeeLabel(){
+  const type = document.querySelector('input[name="cType"]:checked').value;
+  $("cPayeeLabel").textContent = type === "out" ? "ผู้รับเช็ค / Payee *" : "ผู้จ่ายเช็ค / Payer *";
+}
+document.querySelectorAll('input[name="cType"]').forEach(r => r.addEventListener("change", updatePayeeLabel));
+
+function onStatusChange(){
+  if($("cStatus").value === "cleared" && !$("cClearedDate").value){
+    $("cClearedDate").value = new Date().toISOString().slice(0,10);
+  }
+}
+window.onStatusChange = onStatusChange;
+
+function recalcNetCheck(){
+  const amt = +$("cAmount").value || 0;
+  const wht = +$("cWht").value || 0;
+  $("cNetAmount").textContent = fmtMoney(amt - wht);
+}
+window.recalcNetCheck = recalcNetCheck;
+
+async function saveCheck(){
+  const type = document.querySelector('input[name="cType"]:checked').value;
+  const checkNo = $("cCheckNo").value.trim();
+  const checkDate = $("cCheckDate").value;
+  const bank = $("cBank").value.trim();
+  const payee = $("cPayee").value.trim();
+  const amount = +$("cAmount").value;
+  if(!checkNo){ toast("กรอกเลขที่เช็ค","err"); return; }
+  if(!checkDate){ toast("กรอกวันที่","err"); return; }
+  if(!bank){ toast("เลือกธนาคาร","err"); return; }
+  if(!payee){ toast("กรอกผู้รับ/ผู้จ่าย","err"); return; }
+  if(!amount || amount <= 0){ toast("กรอกจำนวนเงิน","err"); return; }
+
+  const btn = $("checkSaveBtn"); btn.disabled = true; btn.textContent = "กำลังบันทึก...";
+  try {
+    const FB = await waitFB();
+    const id = CURRENT_ID || ("chk_"+uid());
+    const data = {
+      type, checkNo, checkDate, bank,
+      branch: $("cBranch").value.trim(),
+      acctNo: $("cAcctNo").value.trim(),
+      payee, amount,
+      wht: +$("cWht").value || 0,
+      description: $("cDescription").value.trim(),
+      projectCode: $("cProjectCode").value.trim(),
+      projectName: $("cProjectName").value.trim(),
+      pvNo: $("cPvNo").value.trim(),
+      invoiceNo: $("cInvoiceNo").value.trim(),
+      status: $("cStatus").value,
+      clearedDate: $("cClearedDate").value,
+      approvedBy: $("cApprovedBy").value.trim(),
+      note: $("cNote").value.trim(),
+      updatedBy: SESSION.name,
+      updatedAt: FB.serverTimestamp()
+    };
+    if(!CURRENT_ID){ data.createdBy = SESSION.name; data.createdAt = FB.serverTimestamp(); }
+    await FB.setDoc(FB.doc(FB.db, "checks", id), data, {merge:true});
+    closeMask("checkModal");
+    toast("บันทึกแล้ว ✓","ok");
+    await loadAll();
+  } catch(e){ toast(e.message,"err"); }
+  finally { btn.disabled = false; btn.textContent = "💾 บันทึก"; }
+}
+window.saveCheck = saveCheck;
+
+async function deleteCheck(){
+  if(!CURRENT_ID) return;
+  if(!confirm("ลบเช็คนี้?")) return;
+  try {
+    const FB = await waitFB();
+    await FB.deleteDoc(FB.doc(FB.db, "checks", CURRENT_ID));
+    closeMask("checkModal");
+    toast("ลบแล้ว","ok");
+    await loadAll();
+  } catch(e){ toast(e.message,"err"); }
+}
+window.deleteCheck = deleteCheck;
+
+// ===== Detail / Receipt PDF =====
+function openDetail(id){
+  CURRENT_ID = id;
+  const c = CHECKS.find(x => x.id === id);
+  if(!c) return;
+  const isOut = c.type === "out";
+  const docNo = "CR-" + c.id.slice(-7).toUpperCase();
+  const net = (+c.amount) - (+c.wht||0);
+
+  $("detailTitle").textContent = (isOut ? "💸 " : "💰 ") + "เช็ค " + c.checkNo;
+
+  $("detailBody").innerHTML = `<div class="report-doc" id="receiptPDF">
+    <div class="rcpt-page">
+      <div class="rcpt-hd">
+        <div class="rl">
+          <img src="${COMPANY.logo}" alt="JM">
+          <div class="co">
+            ${esc(COMPANY.name)}<br>
+            <small>${esc(COMPANY.nameEn)}</small>
+          </div>
+        </div>
+        <div class="title">
+          <h1>${isOut ? "ใบรับเช็คจ่าย" : "ใบรับเช็ค"}</h1>
+          <h2>${isOut ? "CHEQUE ACKNOWLEDGEMENT" : "CHEQUE RECEIPT"}</h2>
+        </div>
+      </div>
+
+      <div class="rcpt-body">
+        <div class="row"><span class="k">เลขที่เอกสาร:</span><span class="v" style="color:#B4421F;font-weight:700">${docNo}</span></div>
+        <div class="row"><span class="k">วันที่:</span><span class="v">${fmtDate(c.checkDate)}</span></div>
+
+        <h3>${isOut ? "ผู้รับเช็ค (Payee)" : "ผู้มอบเช็ค (Payer)"}</h3>
+        <div class="row"><span class="k">${isOut?"ผู้รับเช็ค:":"ได้รับเช็คจาก:"}</span><span class="v">${esc(c.payee||"-")}</span></div>
+        <div class="row"><span class="k">เพื่อชำระค่า:</span><span class="v">${esc(c.description||"-")}</span></div>
+        <div class="row"><span class="k">โครงการ:</span><span class="v">${c.projectCode?esc(c.projectCode)+" - ":""}${esc(c.projectName||"-")}</span></div>
+        ${c.invoiceNo?`<div class="row"><span class="k">เลขใบแจ้งหนี้:</span><span class="v">${esc(c.invoiceNo)}</span></div>`:""}
+        ${c.pvNo?`<div class="row"><span class="k">เลขใบสำคัญจ่าย:</span><span class="v">${esc(c.pvNo)}</span></div>`:""}
+
+        <h3>รายละเอียดเช็ค</h3>
+        <div class="row"><span class="k">ธนาคาร:</span><span class="v">${esc(c.bank||"-")} ${c.branch?"สาขา "+esc(c.branch):""}</span></div>
+        <div class="row"><span class="k">เลขที่เช็ค:</span><span class="v" style="font-weight:700">${esc(c.checkNo||"-")}</span></div>
+        <div class="row"><span class="k">เลขบัญชี:</span><span class="v">${esc(c.acctNo||"-")}</span></div>
+        <div class="row"><span class="k">วันที่ในเช็ค:</span><span class="v">${fmtDate(c.checkDate)}</span></div>
+        <div class="row"><span class="k">จำนวนเงิน:</span><span class="v" style="font-weight:800;font-size:16px;color:#0F1836">${fmtMoney(c.amount)} บาท</span></div>
+        ${c.wht>0?`<div class="row"><span class="k">หัก ณ ที่จ่าย:</span><span class="v">${fmtMoney(c.wht)} บาท</span></div>`:""}
+        ${c.wht>0?`<div class="row"><span class="k">จำนวนสุทธิ:</span><span class="v" style="font-weight:800;color:#15803D">${fmtMoney(net)} บาท</span></div>`:""}
+
+        <h3>สถานะ</h3>
+        <div class="row"><span class="k">สถานะ:</span><span class="v"><span class="status-badge ${c.status}">${STATUS_LABEL[c.status]}</span></span></div>
+        ${c.clearedDate?`<div class="row"><span class="k">วันที่ขึ้นเงิน:</span><span class="v">${fmtDate(c.clearedDate)}</span></div>`:""}
+        ${c.note?`<div class="row"><span class="k">หมายเหตุ:</span><span class="v">${esc(c.note)}</span></div>`:""}
+
+        ${isOut?"":`<h3>หมายเหตุ</h3>
+        <div style="font-size:12px;line-height:1.7;color:#0F1836">
+          ☐ รับไว้เพื่อนำฝากเข้าบัญชี<br>
+          ☐ เช็คยังไม่ได้รับการเก็บเงิน<br>
+          ☐ การรับเช็คนี้ถือว่าเป็นการชำระหนี้เสร็จสมบูรณ์จนกว่าธนาคารจะเรียกเก็บเงินได้
+        </div>`}
+      </div>
+
+      <div class="rcpt-signs">
+        <div class="sc">
+          <div class="role">ลงชื่อ ${isOut?"ผู้มอบเช็ค":"ผู้มอบเช็ค"}</div>
+          <div class="line"></div>
+          <div>${isOut ? "" : esc(c.payee||"")}</div>
+          <div class="co">${isOut ? "บริษัท เจเอ็ม. เพ้นท์ติ้งแอนด์ซัพพลาย จำกัด" : ""}</div>
+        </div>
+        <div class="sc">
+          <div class="role">ลงชื่อ ผู้รับเช็ค</div>
+          <div class="line"></div>
+          <div>${isOut ? esc(c.payee||"") : esc(SESSION.name||"")}</div>
+          <div class="co">${isOut ? "" : "บริษัท เจเอ็ม. เพ้นท์ติ้งแอนด์ซัพพลาย จำกัด"}</div>
+        </div>
+      </div>
+
+      <div class="brand-foot">JM. PAINTING &amp; SUPPLY CO., LTD. · ${esc(COMPANY.slogan)}</div>
+    </div>
+  </div>`;
+  openMask("detailModal");
+}
+window.openDetail = openDetail;
+
+function editFromDetail(){
+  closeMask("detailModal");
+  openCheckModal(CURRENT_ID);
+}
+window.editFromDetail = editFromDetail;
+
+async function exportReceiptPDF(){
+  const c = CHECKS.find(x => x.id === CURRENT_ID);
+  await exportPDFFromNode("receiptPDF", `ใบรับเช็ค_${c?.checkNo||""}.pdf`.replace(/\s+/g,"_"), "portrait");
+}
+window.exportReceiptPDF = exportReceiptPDF;
+
+// ===== Register PDF (landscape) =====
+function exportRegisterPDF(){
+  const isOut = CURRENT_TAB === "out";
+  const month = $("filterMonth").value;
+  const status = $("filterStatus").value;
+  let list = CHECKS.filter(c => c.type === CURRENT_TAB);
+  if(month !== "all") list = list.filter(c => (c.checkDate||"").startsWith(month));
+  if(status !== "all") list = list.filter(c => c.status === status);
+
+  if(!list.length){ toast("ไม่มีเช็คในเดือนที่เลือก","err"); return; }
+
+  const monthTxt = month === "all" ? "ทุกเดือน" : monthLabel(month);
+  const firstCheck = list[0];
+  const bankTxt = firstCheck.bank || "-";
+  const acctTxt = firstCheck.acctNo || "-";
+  const branchTxt = firstCheck.branch || "-";
+
+  const grandAmount = list.reduce((s,c)=>s+(+c.amount||0), 0);
+  const grandWht = list.reduce((s,c)=>s+(+c.wht||0), 0);
+  const grandNet = grandAmount - grandWht;
+
+  // Status summary
+  const byStatus = {};
+  list.forEach(c => {
+    const st = c.status || "pending";
+    if(!byStatus[st]) byStatus[st] = {count:0, sum:0};
+    byStatus[st].count++;
+    byStatus[st].sum += (+c.amount - +(c.wht||0));
+  });
+
+  // Project summary
+  const byProj = {};
+  list.forEach(c => {
+    const k = c.projectCode || "-";
+    if(!byProj[k]) byProj[k] = {name:c.projectName||"-", count:0, sum:0};
+    byProj[k].count++;
+    byProj[k].sum += (+c.amount - +(c.wht||0));
+  });
+
+  const rowsHTML = list.map((c, i) => {
+    const net = (+c.amount) - (+c.wht||0);
+    return `<tr>
+      <td class="c">${i+1}</td>
+      <td class="c">${fmtDate(c.checkDate)}</td>
+      <td class="c"><b>${esc(c.checkNo||"-")}</b></td>
+      <td class="c">${fmtDate(c.checkDate)}</td>
+      <td>${esc(c.payee||"-")}</td>
+      <td>${esc(c.description||"-")}</td>
+      <td class="c">${esc(c.projectCode||"-")}</td>
+      <td>${esc(c.projectName||"-")}</td>
+      <td class="c">${esc(c.pvNo||"-")}</td>
+      <td class="c">${esc(c.invoiceNo||"-")}</td>
+      <td class="r">${fmtMoney(c.amount)}</td>
+      ${isOut?`<td class="r">${c.wht?fmtMoney(c.wht):"-"}</td>`:""}
+      <td class="r">${fmtMoney(net)}</td>
+      <td class="c">${c.clearedDate?fmtDate(c.clearedDate):"-"}</td>
+      <td class="c st-${c.status}">${STATUS_LABEL[c.status]}</td>
+      <td class="c">${esc(c.approvedBy||"-")}</td>
+    </tr>`;
+  }).join("");
+
+  const totalCols = isOut ? 16 : 15;
+
+  $("registerBody").innerHTML = `<div class="report-doc" id="registerPDF">
+    <div class="reg-page">
+      <div class="reg-head">
+        <div class="brand">
+          <img src="${COMPANY.logo}" alt="JM">
+          <div class="co">
+            ${esc(COMPANY.name)}<br>
+            <small class="co-en">${esc(COMPANY.nameEn)}</small>
+          </div>
+        </div>
+        <div class="title">
+          <h1>ทะเบียนคุมเช็ค${isOut?"จ่าย":"รับ"}</h1>
+          <h2>CHEQUE ${isOut?"PAYMENT":"RECEIPT"} REGISTER</h2>
+        </div>
+        <div class="side">JMP<small>สมุดคุมเช็ค</small></div>
+      </div>
+
+      <div class="reg-meta">
+        <div><span class="k">ธนาคาร:</span><span class="v">${esc(bankTxt)}</span></div>
+        <div><span class="k">เลขที่บัญชี:</span><span class="v">${esc(acctTxt)}</span></div>
+        <div><span class="k">สาขา:</span><span class="v">${esc(branchTxt)}</span></div>
+        <div><span class="k">ประจำเดือน:</span><span class="v">${esc(monthTxt)}</span></div>
+      </div>
+
+      <table class="reg-tbl">
+        <thead><tr>
+          <th style="width:36px">ลำดับ<br><small>No.</small></th>
+          <th style="width:70px">วันที่ออกเช็ค<br><small>Cheque Date</small></th>
+          <th style="width:70px">เลขที่เช็ค<br><small>Cheque No.</small></th>
+          <th style="width:70px">วันที่เช็ค<br><small>Cheque Date</small></th>
+          <th style="width:130px">${isOut?"ผู้รับเงิน":"ผู้จ่ายเงิน"}<br><small>${isOut?"Payee":"Payer"}</small></th>
+          <th style="width:110px">รายการ<br><small>Description</small></th>
+          <th style="width:70px">รหัสโครงการ<br><small>Project Code</small></th>
+          <th style="width:130px">ชื่อโครงการ<br><small>Project Name</small></th>
+          <th style="width:80px">เลขใบสำคัญจ่าย<br><small>PV No.</small></th>
+          <th style="width:80px">เลขใบแจ้งหนี้<br><small>Invoice No.</small></th>
+          <th style="width:80px">จำนวนเงิน<br><small>Amount</small></th>
+          ${isOut?'<th style="width:70px">ภาษีหัก ณ ที่จ่าย<br><small>WHT</small></th>':''}
+          <th style="width:80px">จำนวนเงินสุทธิ<br><small>Net Amount</small></th>
+          <th style="width:70px">วันที่ขึ้นเงิน<br><small>Cleared Date</small></th>
+          <th style="width:70px">สถานะ<br><small>Status</small></th>
+          <th style="width:80px">ผู้อนุมัติ<br><small>Approved By</small></th>
+        </tr></thead>
+        <tbody>
+          ${rowsHTML}
+          <tr class="sum">
+            <td colspan="10" class="r">รวมทั้งสิ้น</td>
+            <td class="r">${fmtMoney(grandAmount)}</td>
+            ${isOut?`<td class="r">${fmtMoney(grandWht)}</td>`:""}
+            <td class="r">${fmtMoney(grandNet)}</td>
+            <td colspan="3"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="reg-summary">
+        <div class="reg-sum-box">
+          <div class="hd">สรุปสถานะเช็ค</div>
+          <table>
+            <thead><tr><th>สถานะ</th><th style="width:80px">จำนวน (ฉบับ)</th><th style="width:110px" class="r">จำนวนเงินสุทธิ (บาท)</th></tr></thead>
+            <tbody>
+              ${Object.entries(byStatus).map(([k,v]) => `<tr><td>${STATUS_LABEL[k]||k}</td><td class="c">${v.count}</td><td class="r">${fmtMoney(v.sum)}</td></tr>`).join("")}
+              <tr class="sum"><td>รวมทั้งสิ้น</td><td class="c">${list.length}</td><td class="r">${fmtMoney(grandNet)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="reg-sum-box">
+          <div class="hd">สรุปตามโครงการ</div>
+          <table>
+            <thead><tr><th style="width:70px">รหัสโครงการ</th><th>ชื่อโครงการ</th><th style="width:100px" class="r">จำนวนเงินสุทธิ</th><th style="width:60px" class="r">ร้อยละ</th></tr></thead>
+            <tbody>
+              ${Object.entries(byProj).map(([k,v]) => `<tr><td class="c">${esc(k)}</td><td>${esc(v.name)}</td><td class="r">${fmtMoney(v.sum)}</td><td class="r">${grandNet>0?((v.sum/grandNet)*100).toFixed(2):"0.00"}%</td></tr>`).join("")}
+              <tr class="sum"><td colspan="2" class="r">รวมทั้งสิ้น</td><td class="r">${fmtMoney(grandNet)}</td><td class="r">100.00%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="reg-sum-box">
+          <div class="hd">สรุปกระทบยอดเงินฝากธนาคาร (Bank Reconciliation)</div>
+          <table>
+            <tbody>
+              <tr><td>ยอดคงเหลือตามสมุดเงินฝาก ณ ${fmtDate(new Date())}</td><td class="r" style="width:110px">-</td></tr>
+              <tr><td>บวก เช็ครับที่ยังไม่ขึ้นเงิน</td><td class="r">${fmtMoney(isOut?0:list.filter(c=>c.status!=="cleared"&&c.status!=="cancelled").reduce((s,c)=>s+((+c.amount)-(+c.wht||0)),0))}</td></tr>
+              <tr><td>หัก เช็คจ่ายที่ยังไม่ขึ้นเงิน</td><td class="r">${fmtMoney(isOut?list.filter(c=>c.status!=="cleared"&&c.status!=="cancelled").reduce((s,c)=>s+((+c.amount)-(+c.wht||0)),0):0)}</td></tr>
+              <tr class="sum"><td>ยอดคงเหลือตามบัญชีบริษัท</td><td class="r">-</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="reg-note">
+        <b>หมายเหตุ:</b><br>
+        1. การออกเช็คทุกฉบับต้องมีเอกสารประกอบ (ใบสำคัญจ่าย) และได้รับการอนุมัติ<br>
+        2. กรุณาตรวจสอบรายการขึ้นเงินกับ Bank Statement อย่างน้อยเดือนละ 1 ครั้ง<br>
+        3. เช็คที่ยกเลิก ให้เก็บใบเช็คและระบุเหตุผลการยกเลิก
+      </div>
+
+      <div class="reg-sign">
+        <div class="sc">
+          <div class="role">จัดทำโดย</div>
+          <div class="line"></div>
+          <div class="name">( ${esc(SESSION.name||"")} )</div>
+          <div class="role2">ตำแหน่ง เจ้าหน้าที่บัญชี</div>
+          <div class="dt">วันที่ ${fmtDate(new Date())}</div>
+        </div>
+        <div class="sc">
+          <div class="role">ตรวจสอบโดย</div>
+          <div class="line"></div>
+          <div class="name">(  ...................................  )</div>
+          <div class="role2">ตำแหน่ง หัวหน้าบัญชี</div>
+          <div class="dt">วันที่ ......................</div>
+        </div>
+        <div class="sc">
+          <div class="role">อนุมัติโดย</div>
+          <div class="line"></div>
+          <div class="name">(  ...................................  )</div>
+          <div class="role2">ตำแหน่ง กรรมการผู้จัดการ</div>
+          <div class="dt">วันที่ ......................</div>
+        </div>
+        <div class="sc" style="text-align:left;padding-left:12px;font-size:10.5px;line-height:1.6">
+          <div class="role">หมายเหตุ:</div>
+          <div style="color:#6B7280">• ตรวจนับความถูกต้องของเช็คก่อนลงนาม<br>• เก็บสำเนาเช็คในแฟ้ม<br>• ยืนยัน Bank Statement ประจำเดือน</div>
+        </div>
+      </div>
+
+      <div class="reg-foot">
+        <span>FM-CH-001 Rev.00 · JM. PAINTING &amp; SUPPLY CO., LTD.</span>
+        <span>พิมพ์เมื่อ ${new Date().toLocaleString("th-TH")}</span>
+      </div>
+    </div>
+  </div>`;
+  openMask("registerModal");
+}
+window.exportRegisterPDF = exportRegisterPDF;
+
+async function exportRegisterPDFNow(){
+  await exportPDFFromNode("registerPDF", `ทะเบียนคุมเช็ค${CURRENT_TAB==="out"?"จ่าย":"รับ"}_${$("filterMonth").value}.pdf`.replace(/\s+/g,"_"), "landscape");
+}
+window.exportRegisterPDFNow = exportRegisterPDFNow;
+
+async function exportPDFFromNode(nodeId, filename, orient){
+  try {
+    toast("กำลังสร้าง PDF...");
+    const node = document.getElementById(nodeId);
+    const canvas = await html2canvas(node, {scale:2, backgroundColor:"#fff", useCORS:true, logging:false});
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({unit:"mm", format:"a4", orientation:orient||"portrait"});
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+    const imgW = canvas.width * ratio;
+    const imgH = canvas.height * ratio;
+    const x = (pageW - imgW) / 2;
+    pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", x, 0, imgW, imgH);
+    pdf.save(filename);
+    toast("บันทึก PDF แล้ว ✓", "ok");
+  } catch(e){ toast("ผิดพลาด: "+e.message, "err"); }
+}
+
+loadAll();
+</script>
+</body>
+</html>
