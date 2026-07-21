@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ตั้งค่าไซต์งาน — บจก. เจเอ็ม. เพ้นท์ติ้งแอนด์ซัพพลาย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#1B2A5B">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'IBM Plex Sans Thai', 'Noto Sans Thai', 'Sarabun', sans-serif; background: #F5F2EB; min-height: 100vh; color: #0F1836; }
+
+/* Sidebar */
+.sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: linear-gradient(180deg, #0F1836 0%, #1B2A5B 100%); color: #fff; padding: 28px 20px; display: flex; flex-direction: column; z-index: 10; }
+.sidebar-logo { font-size: 13px; font-weight: 700; margin-bottom: 4px; line-height: 1.4; }
+.sidebar-sub { font-size: 12px; color: #6B7280; margin-bottom: 32px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; color: #8B8B7A; cursor: pointer; margin-bottom: 4px; border: none; background: none; width: 100%; text-align: left; font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif; transition: all 0.15s; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-item.active { color: #D4A574; background: linear-gradient(90deg, rgba(184,137,74,.28), rgba(184,137,74,.06)); border: 1px solid rgba(212,165,116,.35); }
+.sidebar-footer { margin-top: auto; font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 6px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.main { margin-left: 220px; padding: 32px 28px; }
+
+/* Topbar */
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.page-title { font-size: 26px; font-weight: 700; margin-bottom: 4px; color: #0F1836; }
+.page-date { font-size: 14px; color: #6B7280; }
+.back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #fff; border: 1.5px solid #E5DFCE; border-radius: 10px; font-size: 14px; font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif; cursor: pointer; color: #0F1836; text-decoration: none; }
+.back-btn:hover { background: #FAF7F0; }
+
+/* Buttons */
+.btn { padding: 10px 18px; background: #fff; border: 1.5px solid #E5DFCE; border-radius: 10px; font-size: 14px; font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif; cursor: pointer; color: #0F1836; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+.btn:hover { background: #FAF7F0; }
+.btn-dark { background: linear-gradient(135deg, #0F1836, #1B2A5B); color: #fff; border: 0; }
+.btn-dark:hover { background: linear-gradient(135deg, #1B2A5B, #243668); transform: translateY(-1px); }
+.btn-gold { background: linear-gradient(135deg, #B8894A, #9E7239); color: #fff; border: 0; }
+.btn-danger { color: #B4421F; border-color: #FBEAE3; background: #FBEAE3; }
+.btn-sm { padding: 6px 12px; font-size: 12.5px; }
+
+/* Cards */
+.summary-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: #fff; border: 1px solid #E5DFCE; border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(15,24,54,.06), 0 6px 18px rgba(15,24,54,.06); position: relative; overflow: hidden; }
+.stat-card:before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #1B2A5B; }
+.stat-card.gold:before { background: #B8894A; }
+.stat-card.success:before { background: #15803D; }
+.stat-card.warn:before { background: #B45309; }
+.stat-card .lbl { font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; margin-bottom: 4px; }
+.stat-card .val { font-size: 22px; font-weight: 800; color: #0F1836; }
+.stat-card .sub { font-size: 11px; color: #6B7280; margin-top: 2px; }
+
+/* Toolbar */
+.toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.search-box { flex: 1; min-width: 200px; position: relative; }
+.search-box input { width: 100%; padding: 10px 14px 10px 36px; background: #fff; border: 1px solid #E5DFCE; border-radius: 10px; font-size: 14px; outline: none; font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif; }
+.search-box:before { content: "🔍"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .5; }
+
+/* Sites grid */
+.sites-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.site-card { background: #fff; border: 1px solid #E5DFCE; border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(15,24,54,.06); transition: all 0.15s; position: relative; overflow: hidden; }
+.site-card:before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, #1B2A5B, #B8894A); }
+.site-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(15,24,54,.08), 0 16px 32px rgba(15,24,54,.10); border-color: #D4A574; }
+.site-card .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.site-card .name { font-weight: 700; color: #0F1836; font-size: 15px; line-height: 1.3; flex: 1; }
+.site-card .tag { font-size: 10.5px; padding: 2px 8px; border-radius: 99px; background: #E4E8F2; color: #1B2A5B; font-weight: 600; white-space: nowrap; }
+.site-card .tag.active { background: #E4F0E5; color: #15803D; }
+.site-card .tag.inactive { background: #FBEAE3; color: #B4421F; }
+.site-card .floor { font-size: 12.5px; color: #6B7280; margin-bottom: 8px; }
+.site-card .info-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px dashed #E5DFCE; }
+.site-card .info-row:last-child { border-bottom: 0; }
+.site-card .info-row .k { color: #6B7280; }
+.site-card .info-row .v { font-weight: 600; color: #0F1836; font-variant-numeric: tabular-nums; }
+.site-card .actions { display: flex; gap: 6px; margin-top: 12px; }
+.site-card .actions button { flex: 1; }
+
+/* Empty */
+.empty { text-align: center; padding: 60px 20px; color: #6B7280; background: #fff; border-radius: 14px; border: 1px dashed #E5DFCE; }
+.empty .ic { font-size: 60px; opacity: .5; margin-bottom: 10px; }
+.empty h3 { color: #0F1836; margin-bottom: 4px; font-size: 18px; }
+
+/* Modal */
+.mask { position: fixed; inset: 0; background: rgba(15,24,54,.55); z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }
+.mask.show { display: flex; }
+.modal { background: #fff; border-radius: 18px; box-shadow: 0 20px 50px rgba(0,0,0,.15); width: 100%; max-width: 560px; max-height: 94vh; overflow: hidden; display: flex; flex-direction: column; }
+.modal-hd { padding: 14px 20px; border-bottom: 1px solid #E5DFCE; display: flex; align-items: center; gap: 10px; }
+.modal-hd h3 { font-size: 16px; font-weight: 700; color: #0F1836; flex: 1; }
+.modal-x { width: 32px; height: 32px; border-radius: 8px; background: #FAF7F0; color: #6B7280; display: grid; place-items: center; font-size: 18px; border: 0; cursor: pointer; }
+.modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+.modal-ft { padding: 12px 20px; border-top: 1px solid #E5DFCE; display: flex; gap: 8px; justify-content: flex-end; background: #FAF7F0; flex-wrap: wrap; }
+
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12.5px; font-weight: 600; color: #6B7280; margin-bottom: 5px; }
+.field input, .field textarea, .field select { width: 100%; padding: 10px 12px; background: #FAF7F0; border: 1.5px solid #E5DFCE; border-radius: 10px; font-size: 14px; color: #0F1836; outline: none; font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif; }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: #1B2A5B; background: #fff; box-shadow: 0 0 0 3px #E4E8F2; }
+.field textarea { min-height: 60px; resize: vertical; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.help-text { font-size: 11.5px; color: #6B7280; margin-top: 4px; line-height: 1.5; }
+
+/* Toggle */
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.switch input { display: none; }
+.switch-track { width: 40px; height: 22px; background: #E5DFCE; border-radius: 99px; position: relative; transition: .2s; }
+.switch-track:after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.switch input:checked + .switch-track { background: #15803D; }
+.switch input:checked + .switch-track:after { left: 20px; }
+
+.gps-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.gps-buttons button { flex: 1; min-width: 130px; }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0F1836; color: #fff; padding: 12px 20px; border-radius: 12px; font-size: 13.5px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.2); z-index: 200; display: none; }
+.toast.show { display: block; }
+.toast.ok { background: #15803D; }
+.toast.err { background: #B4421F; }
+
+@media (max-width: 900px) {
+  .sidebar { position: sticky; top: 0; left: 0; width: 100%; height: auto; padding: 14px 20px; flex-direction: row; overflow-x: auto; gap: 4px; }
+  .sidebar-logo, .sidebar-sub, .sidebar-footer { display: none; }
+  .nav-item { flex-shrink: 0; padding: 8px 12px; font-size: 13px; margin-bottom: 0; }
+  .main { margin-left: 0; padding: 16px; }
+  .field-row { grid-template-columns: 1fr; }
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">บจก. เจเอ็ม. เพ้นท์ติ้งแอนด์ซัพพลาย</div>
+  <div class="sidebar-sub">ระบบเช็คอินช่าง</div>
+  <button class="nav-item" onclick="location.href='dashboard.html'">📊 Dashboard</button>
+  <button class="nav-item" onclick="location.href='team.html'">👥 ทีมงาน</button>
+  <button class="nav-item" onclick="location.href='report.html'">📋 รายงานรายบุคคล</button>
+  <button class="nav-item active">⚙️ ตั้งค่าไซต์งาน</button>
+  <div class="sidebar-footer"><span class="live-dot"></span>Real-time sync</div>
+</nav>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">ตั้งค่าไซต์งาน</div>
+      <div class="page-date">จัดการไซต์งานสำหรับช่างเช็คอิน</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="index.html" class="back-btn">← กลับหน้าหลัก</a>
+      <button class="btn btn-dark" onclick="openAddSite()">➕ เพิ่มไซต์งาน</button>
+    </div>
+  </div>
+
+  <div class="summary-strip" id="sumStrip"></div>
+
+  <div class="toolbar">
+    <div class="search-box"><input id="searchInput" placeholder="ค้นหาไซต์งาน..." oninput="renderSites()"/></div>
+    <select id="filterStatus" class="btn" onchange="renderSites()">
+      <option value="all">ทุกสถานะ</option>
+      <option value="active">เปิดใช้งาน</option>
+      <option value="inactive">ปิดใช้งาน</option>
+    </select>
+  </div>
+
+  <div id="sitesList"></div>
+</main>
+
+<!-- Add/Edit Modal -->
+<div class="mask" id="siteModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3 id="siteModalTitle">➕ เพิ่มไซต์งาน</h3>
+      <button class="modal-x" onclick="closeMask('siteModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>ชื่อไซต์งาน *</label><input id="sName" placeholder="เช่น โครงการริธึ่ม อโศก2"/></div>
+      <div class="field"><label>ชั้น / รายละเอียด</label><input id="sFloor" placeholder="เช่น ชั้น 25-30"/></div>
+      <div class="field"><label>ที่อยู่</label><textarea id="sAddress" placeholder="ที่อยู่ไซต์งาน (ไม่บังคับ)"></textarea></div>
+
+      <div class="field-row">
+        <div class="field"><label>ละติจูด (Lat) *</label><input id="sLat" type="number" step="any" placeholder="13.72xxx"/></div>
+        <div class="field"><label>ลองจิจูด (Lng) *</label><input id="sLng" type="number" step="any" placeholder="100.53xxx"/></div>
+      </div>
+
+      <div class="gps-buttons">
+        <button class="btn" onclick="useMyLocation()">📍 ใช้ตำแหน่งปัจจุบัน</button>
+        <button class="btn" onclick="openInMaps()">🗺 ดูใน Google Maps</button>
+      </div>
+
+      <div class="field" style="margin-top:12px">
+        <label>รัศมีการเช็คอิน (เมตร)</label>
+        <input id="sRadius" type="number" min="10" max="5000" value="100" placeholder="100"/>
+        <div class="help-text">ช่างต้องอยู่ภายในรัศมีนี้ถึงจะเช็คอินได้ (แนะนำ 50-200 เมตร)</div>
+      </div>
+
+      <div class="field">
+        <label>สถานะ</label>
+        <label class="switch">
+          <input type="checkbox" id="sActive" checked>
+          <span class="switch-track"></span>
+          <span id="sActiveLabel" style="font-weight:600;color:#15803D">เปิดใช้งาน (ช่างเห็นและเช็คอินได้)</span>
+        </label>
+      </div>
+
+      <div class="field"><label>หมายเหตุ</label><textarea id="sNote" placeholder="หมายเหตุเพิ่มเติม"></textarea></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-danger" id="siteDeleteBtn" onclick="deleteSite()" style="display:none">🗑 ลบไซต์งาน</button>
+      <button class="btn" onclick="closeMask('siteModal')">ยกเลิก</button>
+      <button class="btn btn-dark" id="siteSaveBtn" onclick="saveSite()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Portal SSO check ──
+(function checkAuth(){
+  try {
+    var raw = localStorage.getItem("jm_portal_session_v1");
+    if(!raw){ window.location.href = "index.html"; return; }
+    var s = JSON.parse(raw);
+    if(!s || !s.expiresAt || Date.now() > s.expiresAt){
+      window.location.href = "index.html"; return;
+    }
+    // Only owner/manager
+    if(s.role !== "owner" && s.role !== "manager"){
+      window.location.href = "checkin.html"; return;
+    }
+    window.SESSION = s;
+  } catch(e){
+    window.location.href = "index.html";
+  }
+})();
+
+var FIREBASE_CFG = {
+  apiKey: "AIzaSyDWyYUy2bMQr339i1rJw1CvvTZb2L9L1VI",
+  authDomain: "jm-checkin.firebaseapp.com",
+  databaseURL: "https://jm-checkin-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "jm-checkin",
+  storageBucket: "jm-checkin.firebasestorage.app"
+};
+firebase.initializeApp(FIREBASE_CFG);
+var db = firebase.database();
+
+var SITES = [];
+var EDIT_ID = null;
+
+var $ = function(id){ return document.getElementById(id); };
+var esc = function(s){ return String(s||"").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
+
+function toast(msg, kind){
+  var t = $("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (kind ? " " + kind : "");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function(){ t.classList.remove("show"); }, 2600);
+}
+function openMask(id){ $(id).classList.add("show"); }
+function closeMask(id){ $(id).classList.remove("show"); }
+window.closeMask = closeMask;
+
+// Watch active switch
+$("sActive").addEventListener("change", function(){
+  var lbl = $("sActiveLabel");
+  if(this.checked){ lbl.textContent = "เปิดใช้งาน (ช่างเห็นและเช็คอินได้)"; lbl.style.color = "#15803D"; }
+  else { lbl.textContent = "ปิดใช้งาน (ช่างมองไม่เห็น)"; lbl.style.color = "#B4421F"; }
+});
+
+// ── Load sites (real-time) ──
+db.ref("sites").on("value", function(snap){
+  SITES = [];
+  snap.forEach(function(c){
+    var v = c.val() || {};
+    SITES.push({
+      id: c.key,
+      name: v.name || "",
+      floor: v.floor || "",
+      lat: +v.lat || 0,
+      lng: +v.lng || 0,
+      radius: +v.radius || 100,
+      address: v.address || "",
+      note: v.note || "",
+      active: v.active !== false  // default true
+    });
+  });
+  SITES.sort(function(a,b){ return (a.name||"").localeCompare(b.name||"","th"); });
+  renderSummary();
+  renderSites();
+});
+
+function renderSummary(){
+  var total = SITES.length;
+  var active = SITES.filter(function(s){ return s.active; }).length;
+  var inactive = total - active;
+  $("sumStrip").innerHTML =
+    '<div class="stat-card"><div class="lbl">ไซต์งานทั้งหมด</div><div class="val">' + total + '</div><div class="sub">ไซต์</div></div>' +
+    '<div class="stat-card success"><div class="lbl">เปิดใช้งาน</div><div class="val">' + active + '</div><div class="sub">ช่างเช็คอินได้</div></div>' +
+    '<div class="stat-card warn"><div class="lbl">ปิดใช้งาน</div><div class="val">' + inactive + '</div><div class="sub">ซ่อนจากช่าง</div></div>';
+}
+
+function renderSites(){
+  var kw = $("searchInput").value.trim().toLowerCase();
+  var status = $("filterStatus").value;
+  var list = SITES.slice();
+  if(status === "active") list = list.filter(function(s){ return s.active; });
+  else if(status === "inactive") list = list.filter(function(s){ return !s.active; });
+  if(kw) list = list.filter(function(s){
+    return ((s.name+" "+s.floor+" "+s.address).toLowerCase()).indexOf(kw) >= 0;
+  });
+
+  var wrap = $("sitesList");
+  if(!list.length){
+    wrap.innerHTML = '<div class="empty"><div class="ic">🏗️</div><h3>ยังไม่มีไซต์งาน</h3><p>กด "เพิ่มไซต์งาน" เพื่อสร้างไซต์แรก</p></div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="sites-grid">' + list.map(function(s){
+    var statusTag = s.active
+      ? '<span class="tag active">✓ เปิด</span>'
+      : '<span class="tag inactive">✕ ปิด</span>';
+    return '<div class="site-card">' +
+      '<div class="head">' +
+        '<div class="name">🏗️ ' + esc(s.name) + '</div>' +
+        statusTag +
+      '</div>' +
+      (s.floor ? '<div class="floor">📍 ' + esc(s.floor) + '</div>' : "") +
+      '<div class="info-row"><span class="k">พิกัด</span><span class="v">' + s.lat.toFixed(5) + ', ' + s.lng.toFixed(5) + '</span></div>' +
+      '<div class="info-row"><span class="k">รัศมีเช็คอิน</span><span class="v">' + s.radius + ' ม.</span></div>' +
+      (s.address ? '<div class="info-row"><span class="k">ที่อยู่</span><span class="v" style="font-size:11.5px;text-align:right;max-width:60%">' + esc(s.address) + '</span></div>' : "") +
+      '<div class="actions">' +
+        '<button class="btn btn-sm" onclick="openInMapsForSite(' + s.lat + ',' + s.lng + ')">🗺 แผนที่</button>' +
+        '<button class="btn btn-sm btn-dark" onclick="openEditSite(\'' + s.id + '\')">✏️ แก้ไข</button>' +
+      '</div>' +
+    '</div>';
+  }).join("") + '</div>';
+}
+window.renderSites = renderSites;
+
+function openInMapsForSite(lat, lng){
+  window.open("https://maps.google.com/?q=" + lat + "," + lng, "_blank");
+}
+window.openInMapsForSite = openInMapsForSite;
+
+// ── Add/Edit ──
+function openAddSite(){
+  EDIT_ID = null;
+  $("siteModalTitle").textContent = "➕ เพิ่มไซต์งาน";
+  $("siteDeleteBtn").style.display = "none";
+  ["sName","sFloor","sAddress","sLat","sLng","sNote"].forEach(function(id){ $(id).value = ""; });
+  $("sRadius").value = 100;
+  $("sActive").checked = true;
+  $("sActive").dispatchEvent(new Event("change"));
+  openMask("siteModal");
+}
+window.openAddSite = openAddSite;
+
+function openEditSite(id){
+  var s = SITES.find(function(x){ return x.id === id; });
+  if(!s){ toast("ไม่พบไซต์งาน","err"); return; }
+  EDIT_ID = id;
+  $("siteModalTitle").textContent = "✏️ แก้ไขไซต์งาน";
+  $("siteDeleteBtn").style.display = "";
+  $("sName").value = s.name;
+  $("sFloor").value = s.floor;
+  $("sAddress").value = s.address;
+  $("sLat").value = s.lat;
+  $("sLng").value = s.lng;
+  $("sRadius").value = s.radius;
+  $("sNote").value = s.note;
+  $("sActive").checked = s.active;
+  $("sActive").dispatchEvent(new Event("change"));
+  openMask("siteModal");
+}
+window.openEditSite = openEditSite;
+
+function useMyLocation(){
+  if(!navigator.geolocation){ toast("อุปกรณ์ไม่รองรับ GPS","err"); return; }
+  toast("กำลังขอตำแหน่ง...");
+  navigator.geolocation.getCurrentPosition(function(pos){
+    $("sLat").value = pos.coords.latitude.toFixed(6);
+    $("sLng").value = pos.coords.longitude.toFixed(6);
+    toast("อ่านตำแหน่งสำเร็จ ✓","ok");
+  }, function(err){
+    toast("ผิดพลาด: " + err.message, "err");
+  }, {enableHighAccuracy:true, timeout:10000});
+}
+window.useMyLocation = useMyLocation;
+
+function openInMaps(){
+  var lat = $("sLat").value, lng = $("sLng").value;
+  if(!lat || !lng){ toast("กรอกพิกัดก่อน","err"); return; }
+  window.open("https://maps.google.com/?q=" + lat + "," + lng, "_blank");
+}
+window.openInMaps = openInMaps;
+
+function saveSite(){
+  var name = $("sName").value.trim();
+  var lat = parseFloat($("sLat").value);
+  var lng = parseFloat($("sLng").value);
+  var radius = parseInt($("sRadius").value) || 100;
+  if(!name){ toast("กรอกชื่อไซต์งาน","err"); return; }
+  if(isNaN(lat) || isNaN(lng)){ toast("กรอกพิกัดให้ถูกต้อง","err"); return; }
+  if(radius < 10 || radius > 5000){ toast("รัศมีต้องอยู่ระหว่าง 10-5000 เมตร","err"); return; }
+
+  var btn = $("siteSaveBtn");
+  btn.disabled = true; btn.textContent = "กำลังบันทึก...";
+
+  var data = {
+    name: name,
+    floor: $("sFloor").value.trim(),
+    address: $("sAddress").value.trim(),
+    lat: lat, lng: lng, radius: radius,
+    note: $("sNote").value.trim(),
+    active: $("sActive").checked,
+    updatedAt: firebase.database.ServerValue.TIMESTAMP,
+    updatedBy: (window.SESSION && window.SESSION.name) || ""
+  };
+
+  var ref;
+  if(EDIT_ID){
+    ref = db.ref("sites/" + EDIT_ID).update(data);
+  } else {
+    data.createdAt = firebase.database.ServerValue.TIMESTAMP;
+    ref = db.ref("sites").push(data);
+  }
+
+  Promise.resolve(ref).then(function(){
+    closeMask("siteModal");
+    toast(EDIT_ID ? "บันทึกการแก้ไขแล้ว ✓" : "เพิ่มไซต์งานแล้ว ✓", "ok");
+  }).catch(function(err){
+    toast("ผิดพลาด: " + err.message, "err");
+  }).finally(function(){
+    btn.disabled = false; btn.textContent = "💾 บันทึก";
+  });
+}
+window.saveSite = saveSite;
+
+function deleteSite(){
+  if(!EDIT_ID) return;
+  var s = SITES.find(function(x){ return x.id === EDIT_ID; });
+  if(!confirm("ลบไซต์งาน \"" + (s ? s.name : "") + "\"?\n\nการลบจะไม่กระทบข้อมูลการเช็คอินย้อนหลัง")) return;
+  db.ref("sites/" + EDIT_ID).remove().then(function(){
+    closeMask("siteModal");
+    toast("ลบแล้ว", "ok");
+  }).catch(function(err){
+    toast("ผิดพลาด: " + err.message, "err");
+  });
+}
+window.deleteSite = deleteSite;
+</script>
+</body>
+</html>
