@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบจัดการร้าน — หม่าล่า & บาร์นั่งชิล</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --page:#f4f4f2; --surface:#ffffff; --surface2:#f1f0ec; --line:#e4e3dd;
+  --ink:#141413; --ink2:#54534e; --muted:#8a8880;
+  --accent:#eb6834; --accent2:#e34948; --gold:#c98500;
+  --blue:#2a78d6; --aqua:#199e70; --green:#0ca30c;
+  --good:#0ca30c; --warn:#b7791f; --bad:#d03b3b;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI","Sarabun",sans-serif;
+  background:var(--page); color:var(--ink); font-size:15px; line-height:1.5;
+}
+button{font-family:inherit}
+::-webkit-scrollbar{height:10px;width:10px}
+::-webkit-scrollbar-thumb{background:#cfcec7;border-radius:6px}
+
+/* Layout */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:230px;background:linear-gradient(180deg,#fff6f2,#ffffff);
+  border-right:1px solid var(--line);padding:18px 14px;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;gap:6px;overflow:auto;flex-shrink:0;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 16px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.brand .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.brand h1{font-size:15px;margin:0;line-height:1.2}
+.brand small{color:var(--muted);font-size:11px}
+.nav{display:flex;flex-direction:column;gap:3px;flex:1}
+.nav button{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  background:transparent;border:none;color:var(--ink2);padding:10px 12px;border-radius:10px;
+  cursor:pointer;font-size:14px;transition:.15s;
+}
+.nav button .ic{width:20px;text-align:center;font-size:16px}
+.nav button:hover{background:var(--surface2);color:var(--ink)}
+.nav button.active{background:linear-gradient(135deg,rgba(235,104,52,.15),rgba(227,73,72,.10));color:var(--accent);font-weight:700}
+.nav .badge{margin-left:auto;background:var(--bad);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:1px 7px;min-width:20px;text-align:center}
+.sb-foot{border-top:1px solid var(--line);padding-top:10px;color:var(--muted);font-size:11px}
+
+.main{flex:1;min-width:0;padding:22px 26px 60px}
+.topbar{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.topbar h2{margin:0;font-size:22px}
+.topbar .sub{color:var(--muted);font-size:13px}
+.topbar .spacer{flex:1}
+
+/* Cards */
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(185px,1fr));margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:0 1px 2px rgba(20,20,19,.04)}
+.kpi .label{color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:6px}
+.kpi .val{font-size:26px;font-weight:700;margin-top:6px;letter-spacing:-.5px}
+.kpi .val small{font-size:14px;color:var(--ink2);font-weight:500}
+.kpi .foot{font-size:12px;color:var(--muted);margin-top:4px}
+.kpi .accent{color:var(--accent)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:20px}
+.pill.good{background:rgba(12,163,12,.15);color:#0a8f0a}
+.pill.warn{background:rgba(250,178,25,.15);color:var(--warn)}
+.pill.bad{background:rgba(208,59,59,.15);color:#d03b3b}
+.pill.neutral{background:var(--surface2);color:var(--ink2)}
+
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;align-items:start}
+@media(max-width:1000px){.two-col{grid-template-columns:1fr}}
+.card h3{margin:0 0 14px;font-size:15px;display:flex;align-items:center;gap:8px}
+.card h3 .spacer{flex:1}
+
+/* Table */
+.tbl-wrap{overflow:auto;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0;background:var(--surface)}
+tbody tr:hover{background:var(--surface2)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--surface2);color:var(--ink2)}
+
+/* Buttons & inputs */
+.btn{background:var(--surface2);color:var(--ink);border:1px solid var(--line);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;transition:.15s}
+.btn:hover{border-color:#444;background:#2b2b28}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 10px;font-size:12.5px}
+.btn.danger{color:#d03b3b;border-color:rgba(208,59,59,.4)}
+.btn.danger:hover{background:rgba(208,59,59,.12)}
+input,select{font-family:inherit;font-size:14px;background:#fff;border:1px solid var(--line);color:var(--ink);padding:8px 10px;border-radius:8px;width:100%}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+label.fld{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.form-row{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));align-items:end}
+.icon-btn{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:3px 6px;border-radius:6px}
+.icon-btn:hover{background:var(--surface2);color:var(--ink)}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;backdrop-filter:blur(2px)}
+.modal-bg.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;width:100%;max-width:460px;max-height:88vh;overflow:auto}
+.modal h3{margin:0 0 16px;font-size:17px}
+.modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* misc */
+.section-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:22px 0 10px;font-weight:600}
+.empty{color:var(--muted);text-align:center;padding:30px;font-size:14px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--line);padding:12px 20px;border-radius:12px;z-index:100;opacity:0;transition:.3s;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{border-color:rgba(12,163,12,.5)}
+.hint{background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:11px 14px;font-size:13px;color:var(--ink2);margin-bottom:16px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13px}
+.bar-row .nm{width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.bar-track{flex:1;background:var(--surface2);border-radius:6px;height:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.bar-row .vl{width:80px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2);flex-shrink:0}
+.mini{color:var(--muted);font-size:12px}
+.hide{display:none!important}
+.status-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px}
+.flex{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.right{margin-left:auto}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chip{background:var(--surface2);border:1px solid var(--line);padding:5px 12px;border-radius:20px;font-size:13px;cursor:pointer;color:var(--ink2)}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+svg text{font-family:inherit}
+@media(max-width:760px){
+  .sidebar{position:fixed;left:-240px;z-index:40;transition:.25s}
+  .sidebar.open{left:0}
+  .main{padding:16px}
+  .menu-toggle{display:inline-flex!important}
+}
+.menu-toggle{display:none;background:var(--surface2);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;border-radius:10px;font-size:18px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">🌶️</div>
+      <div>
+        <h1 id="brandName">ร้านหม่าล่า</h1>
+        <small>ระบบจัดการร้าน</small>
+      </div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sb-foot">
+      บันทึกข้อมูลอัตโนมัติในเครื่องนี้<br>อย่าลืมสำรองข้อมูลที่หน้า “ตั้งค่า”
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div>
+        <h2 id="pageTitle">แดชบอร์ด</h2>
+        <div class="sub" id="pageSub"></div>
+      </div>
+      <div class="spacer"></div>
+      <div id="topActions"></div>
+    </div>
+    <div id="view"></div>
+  </main>
+</div>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   ระบบจัดการร้านหม่าล่า & บาร์  — เก็บข้อมูลด้วย localStorage
+   ============================================================ */
+const KEY='malaPOS_v1';
+const B='฿';
+const fmt=n=>(Math.round((+n||0)*100)/100).toLocaleString('th-TH',{maximumFractionDigits:2});
+const money=n=>B+fmt(n);
+const todayStr=()=>{const d=new Date();return d.toISOString().slice(0,10);};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ---------- ข้อมูลตัวอย่างเริ่มต้น ---------- */
+function seed(){
+  const ing=[
+    // เนื้อสัตว์ / ไม้หม่าล่า
+    ['เนื้อวัวสไลซ์','เนื้อสัตว์','กิโล',220,8,5],['หมูสไลซ์','เนื้อสัตว์','กิโล',130,10,6],
+    ['ลูกชิ้นปลา','เนื้อสัตว์','กิโล',90,6,4],['ลูกชิ้นเนื้อ','เนื้อสัตว์','กิโล',110,5,3],
+    ['กุ้งสด','เนื้อสัตว์','กิโล',260,4,3],['ปลาหมึก','เนื้อสัตว์','กิโล',200,3,2],
+    ['ไส้กรอกรวม','เนื้อสัตว์','แพ็ค',45,20,10],['เบคอน','เนื้อสัตว์','แพ็ค',60,12,6],
+    // ผัก / เห็ด
+    ['เห็ดเข็มทอง','ผัก/เห็ด','แพ็ค',15,30,15],['เห็ดหอม','ผัก/เห็ด','กิโล',120,3,2],
+    ['ผักกาดขาว','ผัก/เห็ด','กิโล',25,10,5],['ข้าวโพดอ่อน','ผัก/เห็ด','แพ็ค',20,15,8],
+    ['เต้าหู้','ผัก/เห็ด','แพ็ค',12,25,12],['สาหร่าย','ผัก/เห็ด','แพ็ค',18,20,10],
+    // เส้น / แป้ง
+    ['วุ้นเส้น','เส้น/แป้ง','แพ็ค',10,40,20],['บะหมี่','เส้น/แป้ง','แพ็ค',8,50,25],
+    ['เกี๊ยว','เส้น/แป้ง','แพ็ค',30,15,8],
+    // เครื่องปรุงหม่าล่า
+    ['น้ำมันหม่าล่า','เครื่องปรุง','ลิตร',180,5,2],['พริกหม่าล่าแห้ง','เครื่องปรุง','กิโล',320,2,1],
+    ['ผงหม่าล่า','เครื่องปรุง','กิโล',280,1.5,1],['งาขาว','เครื่องปรุง','กิโล',90,2,1],
+    ['น้ำจิ้มสุกี้','เครื่องปรุง','ขวด',35,20,8],
+    // เบียร์
+    ['เบียร์ช้าง','เบียร์','ขวด',45,60,24],['เบียร์ลีโอ','เบียร์','ขวด',45,48,24],
+    ['เบียร์สิงห์','เบียร์','ขวด',50,36,18],['เบียร์อาซาฮี','เบียร์','ขวด',70,24,12],
+    // เหล้า
+    ['เหล้าขาว','เหล้า','ขวด',120,15,6],['รีเจนซี','เหล้า','ขวด',300,10,4],
+    ['แสงโสม','เหล้า','ขวด',320,8,4],['วิสกี้ดำ','เหล้า','ขวด',750,6,3],
+    // ซอฟต์ดริงก์ / อื่นๆ
+    ['โซดา','ซอฟต์ดริงก์','ขวด',15,60,24],['โค้ก','ซอฟต์ดริงก์','ขวด',20,48,24],
+    ['น้ำแข็ง','ซอฟต์ดริงก์','ถุง',25,20,10],['น้ำเปล่า','ซอฟต์ดริงก์','ขวด',7,72,36],
+  ].map(r=>({id:uid(),name:r[0],category:r[1],unit:r[2],cost:r[3],stock:r[4],par:r[5]}));
+
+  const menu=[
+    ['หม่าล่าไม้ (คละ)','หม่าล่า',10,4],['เซ็ตหม่าล่ารวม S','หม่าล่า',199,80],
+    ['เซ็ตหม่าล่ารวม M','หม่าล่า',349,150],['เซ็ตหม่าล่ารวม L','หม่าล่า',599,260],
+    ['หม้อหม่าล่าเดี่ยว','หม่าล่า',129,45],['เนื้อวัวสไลซ์ (จาน)','อาหาร',89,45],
+    ['หมูสไลซ์ (จาน)','อาหาร',59,28],['กุ้งสด (จาน)','อาหาร',99,55],
+    ['รวมมิตรผัก (จาน)','อาหาร',49,15],['ชุดกับแกล้ม','อาหาร',159,60],['ข้าวสวย','อาหาร',15,5],
+    ['เบียร์ช้าง (ขวด)','เบียร์',90,45],['เบียร์ลีโอ (ขวด)','เบียร์',90,45],
+    ['เบียร์สิงห์ (ขวด)','เบียร์',100,50],['เบียร์อาซาฮี (ขวด)','เบียร์',130,70],
+    ['ทาวเวอร์เบียร์','เบียร์',490,250],['เหล้าขาว (ขวด)','เหล้า',250,120],
+    ['แสงโสม (ขวด)','เหล้า',550,320],['รีเจนซี (ขวด)','เหล้า',520,300],
+    ['โซดา (ขวด)','เครื่องดื่ม',30,15],['โค้ก (ขวด)','เครื่องดื่ม',40,20],['น้ำแข็ง (ถัง)','เครื่องดื่ม',30,12],
+  ].map(r=>({id:uid(),name:r[0],category:r[1],price:r[2],cost:r[3]}));
+
+  // สร้างยอดขายตัวอย่าง 14 วันย้อนหลัง
+  const sales=[];
+  for(let d=13;d>=0;d--){
+    const day=new Date();day.setDate(day.getDate()-d);const ds=day.toISOString().slice(0,10);
+    const dow=day.getDay();const busy=(dow===5||dow===6)?1.7:(dow===0?1.3:1);
+    const bills=Math.round((6+Math.random()*6)*busy);
+    for(let b=0;b<bills;b++){
+      const lines=2+Math.floor(Math.random()*4);
+      for(let l=0;l<lines;l++){
+        const m=menu[Math.floor(Math.random()*menu.length)];
+        const qty=1+Math.floor(Math.random()*(m.category==='หม่าล่า'?6:3));
+        sales.push({id:uid(),date:ds,menuId:m.id,name:m.name,qty,price:m.price,cost:m.cost});
+      }
+    }
+  }
+  // การรับของตัวอย่าง
+  const purchases=[];
+  for(let d=12;d>=0;d-=4){
+    const day=new Date();day.setDate(day.getDate()-d);const ds=day.toISOString().slice(0,10);
+    for(let k=0;k<5;k++){
+      const it=ing[Math.floor(Math.random()*ing.length)];
+      purchases.push({id:uid(),date:ds,ingId:it.id,name:it.name,qty:Math.ceil(it.par),unitCost:it.cost,supplier:['ตลาดไท','แม็คโคร','เจ๊แดงของสด','ตัวแทนเบียร์'][Math.floor(Math.random()*4)]});
+    }
+  }
+  return {
+    settings:{shop:'ร้านหม่าล่า นั่งชิล',fcTarget:35},
+    ingredients:ing, menu, sales, purchases, counts:[]
+  };
+}
+
+/* ---------- โหลด / บันทึก ---------- */
+let DB;
+function load(){
+  try{const r=localStorage.getItem(KEY);if(r){DB=JSON.parse(r);migrate();return;}}catch(e){}
+  DB=seed();migrate();save();
+}
+function migrate(){
+  if(!DB.settings)DB.settings={shop:'ร้านของฉัน',fcTarget:35};
+  if(!DB.counts)DB.counts=[];
+  if(!DB.settings.order)DB.settings.order={url:'https://jmpainting16-alt.github.io/-jm-stock/order.html',lineId:'',note:'สแกนเพื่อดูเมนูและสั่งอาหาร เลือกของแล้วกดส่งออเดอร์ทาง LINE ได้เลย',tables:10};
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){toast('บันทึกไม่สำเร็จ (พื้นที่เต็ม?)');}}
+
+/* ---------- helper คำนวณ ---------- */
+const ing=()=>DB.ingredients, menu=()=>DB.menu, sales=()=>DB.sales;
+const ingById=id=>ing().find(x=>x.id===id);
+const invValue=()=>ing().reduce((s,i)=>s+i.stock*i.cost,0);
+const lowStock=()=>ing().filter(i=>i.stock<=i.par);
+function salesOn(ds){return sales().filter(s=>s.date===ds);}
+function sumRevenue(list){return list.reduce((s,x)=>s+x.qty*x.price,0);}
+function sumCost(list){return list.reduce((s,x)=>s+x.qty*(x.cost||0),0);}
+function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);}
+function rangeSales(days){const from=daysAgo(days-1);return sales().filter(s=>s.date>=from);}
+function catColor(i){return['#eb6834','#3987e5','#199e70','#eda100','#e87ba4','#4a3aa7','#e34948','#0ca30c'][i%8];}
+
+/* ---------- UI helpers ---------- */
+function toast(msg,ok){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(ok?' ok':'');setTimeout(()=>t.className='toast',2200);}
+function openModal(html){document.getElementById('modal').innerHTML=html;document.getElementById('modalBg').classList.add('show');}
+function closeModal(){document.getElementById('modalBg').classList.remove('show');}
+document.getElementById('modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')closeModal();});
+
+/* ---------- เมนูนำทาง ---------- */
+const PAGES=[
+  {id:'dash',ic:'📊',name:'แดชบอร์ด',sub:'ภาพรวมร้านวันนี้'},
+  {id:'orders',ic:'🔔',name:'ออเดอร์สด',sub:'ออเดอร์จากลูกค้าเรียลไทม์'},
+  {id:'sales',ic:'🧾',name:'บันทึกยอดขาย',sub:'บันทึกบิล/รายการขาย'},
+  {id:'stock',ic:'📦',name:'สต็อกวัตถุดิบ',sub:'รายการวัตถุดิบและคงเหลือ'},
+  {id:'count',ic:'✅',name:'นับสต็อก',sub:'ตรวจนับของจริงเทียบระบบ'},
+  {id:'purchase',ic:'🚚',name:'รับของเข้า',sub:'บันทึกการซื้อ/รับวัตถุดิบ'},
+  {id:'menu',ic:'📋',name:'เมนู & ต้นทุน',sub:'รายการเมนูและต้นทุน'},
+  {id:'qr',ic:'📱',name:'QR สั่งอาหาร',sub:'เมนูออนไลน์ & QR ประจำโต๊ะ'},
+  {id:'report',ic:'📈',name:'รายงาน',sub:'ยอดขาย ต้นทุน กำไร'},
+  {id:'settings',ic:'⚙️',name:'ตั้งค่า & สำรองข้อมูล',sub:'ตั้งค่าร้าน นำเข้า/ส่งออก'},
+];
+let current='dash';
+function buildNav(){
+  const nav=document.getElementById('nav');nav.innerHTML='';
+  PAGES.forEach(p=>{
+    const b=el('button',p.id===current?'active':'');
+    b.innerHTML=`<span class="ic">${p.ic}</span><span>${p.name}</span>`;
+    if(p.id==='stock'){const n=lowStock().length;if(n)b.innerHTML+=`<span class="badge">${n}</span>`;}
+    if(p.id==='orders'){const n=_orders.length;if(n)b.innerHTML+=`<span class="badge" style="background:var(--good)">${n}</span>`;}
+    b.onclick=()=>{current=p.id;document.getElementById('sidebar').classList.remove('open');render();};
+    nav.appendChild(b);
+  });
+}
+function render(){
+  buildNav();
+  const p=PAGES.find(x=>x.id===current);
+  document.getElementById('pageTitle').textContent=p.name;
+  document.getElementById('pageSub').textContent=p.sub;
+  document.getElementById('brandName').textContent=DB.settings.shop;
+  document.getElementById('topActions').innerHTML='';
+  ({dash:viewDash,orders:viewOrders,sales:viewSales,stock:viewStock,count:viewCount,purchase:viewPurchase,menu:viewMenu,qr:viewQR,report:viewReport,settings:viewSettings}[current])();
+}
+
+/* =========================================================
+   แดชบอร์ด
+   ========================================================= */
+function viewDash(){
+  const v=document.getElementById('view');
+  const today=salesOn(todayStr());
+  const tRev=sumRevenue(today), tCost=sumCost(today);
+  const bills=new Set(today.map(s=>s.date+ s.id)).size; // approx line count
+  const monthList=sales().filter(s=>s.date.slice(0,7)===todayStr().slice(0,7));
+  const mRev=sumRevenue(monthList);
+  const fc=tRev>0?(tCost/tRev*100):0;
+  const low=lowStock();
+  const target=DB.settings.fcTarget||35;
+
+  // 7-day sales
+  const days=[];for(let i=6;i>=0;i--){const ds=daysAgo(i);days.push({ds,rev:sumRevenue(salesOn(ds))});}
+  const maxRev=Math.max(...days.map(d=>d.rev),1);
+
+  // top items 30d
+  const rs=rangeSales(30);const byItem={};
+  rs.forEach(s=>{byItem[s.name]=(byItem[s.name]||0)+s.qty*s.price;});
+  const top=Object.entries(byItem).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxTop=Math.max(...top.map(t=>t[1]),1);
+
+  // by category 30d
+  const byCat={};rs.forEach(s=>{const m=menu().find(x=>x.id===s.menuId);const c=m?m.category:'อื่นๆ';byCat[c]=(byCat[c]||0)+s.qty*s.price;});
+  const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);const catTotal=cats.reduce((s,c)=>s+c[1],0)||1;
+
+  v.innerHTML=`
+    <div class="grid kpis">
+      <div class="card kpi"><div class="label">💰 ยอดขายวันนี้</div><div class="val">${money(tRev)}</div><div class="foot">${today.length} รายการ · ต้นทุน ${money(tCost)}</div></div>
+      <div class="card kpi"><div class="label">📅 ยอดขายเดือนนี้</div><div class="val">${money(mRev)}</div><div class="foot">${monthList.length} รายการรวม</div></div>
+      <div class="card kpi"><div class="label">🍜 ต้นทุนวัตถุดิบวันนี้ (Food Cost)</div><div class="val ${fc>target?'':''}" style="color:${fc>target?'#d03b3b':'#0a8f0a'}">${fmt(fc)}<small>%</small></div><div class="foot">เป้าหมาย ≤ ${target}%</div></div>
+      <div class="card kpi"><div class="label">📦 มูลค่าสต็อกคงคลัง</div><div class="val">${money(invValue())}</div><div class="foot">${ing().length} รายการวัตถุดิบ</div></div>
+      <div class="card kpi"><div class="label">⚠️ ใกล้หมด/ต้องสั่ง</div><div class="val" style="color:${low.length?'#b7791f':'#0a8f0a'}">${low.length}<small> รายการ</small></div><div class="foot">${low.length?'ดูรายการด้านล่าง':'สต็อกเพียงพอ 👍'}</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>📈 ยอดขาย 7 วันล่าสุด</h3>
+        ${sparkBars(days,maxRev)}
+      </div>
+      <div class="card">
+        <h3>🏆 เมนูขายดี (30 วัน)</h3>
+        ${top.length?top.map(t=>barRow(t[0],t[1],maxTop,money(t[1]))).join(''):'<div class="empty">ยังไม่มีข้อมูล</div>'}
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:14px">
+      <div class="card">
+        <h3>⚠️ รายการที่ต้องสั่งเพิ่ม</h3>
+        ${low.length?`<div class="tbl-wrap"><table><thead><tr><th>วัตถุดิบ</th><th>หมวด</th><th class="num">คงเหลือ</th><th class="num">จุดสั่งซื้อ</th><th></th></tr></thead><tbody>
+          ${low.map(i=>`<tr><td>${i.name}</td><td><span class="tag">${i.category}</span></td><td class="num" style="color:${i.stock<=0?'#d03b3b':'#b7791f'}">${fmt(i.stock)} ${i.unit}</td><td class="num">${fmt(i.par)}</td><td><button class="btn sm" onclick="quickReceive('${i.id}')">รับเข้า</button></td></tr>`).join('')}
+        </tbody></table></div>`:'<div class="empty">ทุกอย่างเพียงพอ ✅</div>'}
+      </div>
+      <div class="card">
+        <h3>🧩 สัดส่วนยอดขายตามหมวด (30 วัน)</h3>
+        ${cats.length?cats.map((c,i)=>`<div class="bar-row"><div class="nm"><span class="status-dot" style="background:${catColor(i)}"></span>${c[0]}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(c[1]/catTotal*100,2)}%;background:${catColor(i)}"></div></div><div class="vl">${fmt(c[1]/catTotal*100)}%</div></div>`).join(''):'<div class="empty">ยังไม่มีข้อมูล</div>'}
+      </div>
+    </div>
+  `;
+}
+function barRow(name,val,max,label){
+  return `<div class="bar-row"><div class="nm">${name}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(val/max*100,3)}%"></div></div><div class="vl">${label}</div></div>`;
+}
+function sparkBars(days,max){
+  const w=100/days.length;
+  let bars=days.map((d,i)=>{
+    const h=Math.max(d.rev/max*100,2);
+    const dt=new Date(d.ds);const lbl=['อา','จ','อ','พ','พฤ','ศ','ส'][dt.getDay()];
+    return `<g>
+      <rect x="${i*w+w*0.15}%" y="${100-h}%" width="${w*0.7}%" height="${h}%" rx="3" fill="url(#g1)">
+        <title>${d.ds}: ${money(d.rev)}</title></rect>
+    </g>`;
+  }).join('');
+  let labels=days.map((d,i)=>{const dt=new Date(d.ds);const lbl=['อา','จ','อ','พ','พฤ','ศ','ส'][dt.getDay()];return `<div style="flex:1;text-align:center">${lbl}<br><span style="color:var(--muted);font-size:11px">${d.rev>=1000?Math.round(d.rev/1000)+'k':fmt(d.rev)}</span></div>`;}).join('');
+  return `<div style="height:140px"><svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
+    <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eb6834"/><stop offset="1" stop-color="#e34948"/></linearGradient></defs>
+    ${bars}</svg></div>
+    <div style="display:flex;font-size:12px;margin-top:6px">${labels}</div>`;
+}
+function quickReceive(id){current='purchase';render();setTimeout(()=>receiveModal(id),50);}
+
+/* =========================================================
+   บันทึกยอดขาย
+   ========================================================= */
+let salesDate=todayStr();
+function viewSales(){
+  const v=document.getElementById('view');
+  document.getElementById('topActions').innerHTML=`<button class="btn primary" onclick="saleModal()">+ เพิ่มรายการขาย</button>`;
+  const list=salesOn(salesDate).slice().reverse();
+  const rev=sumRevenue(salesOn(salesDate)),cost=sumCost(salesOn(salesDate));
+  v.innerHTML=`
+    <div class="hint">เลือกเมนูที่ขายแล้วกดบันทึก ระบบจะรวมยอดขายและคำนวณ Food Cost ให้อัตโนมัติ · ข้อมูลใช้ในแดชบอร์ดและรายงาน</div>
+    <div class="flex" style="margin-bottom:14px">
+      <label class="fld" style="margin:0">วันที่:</label>
+      <input type="date" style="width:auto" value="${salesDate}" onchange="salesDate=this.value;viewSales()">
+      <div class="right flex">
+        <div class="card kpi" style="padding:10px 16px"><div class="label">ยอดขายวันนี้</div><div class="val" style="font-size:20px">${money(rev)}</div></div>
+        <div class="card kpi" style="padding:10px 16px"><div class="label">กำไรขั้นต้น</div><div class="val" style="font-size:20px;color:#0a8f0a">${money(rev-cost)}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>รายการขายวันที่ ${salesDate} <span class="spacer"></span><span class="mini">${list.length} รายการ</span></h3>
+      ${list.length?`<div class="tbl-wrap"><table><thead><tr><th>เวลา/รายการ</th><th>หมวด</th><th class="num">จำนวน</th><th class="num">ราคา/หน่วย</th><th class="num">รวม</th><th></th></tr></thead><tbody>
+        ${list.map(s=>{const m=menu().find(x=>x.id===s.menuId);return `<tr><td>${s.name}</td><td><span class="tag">${m?m.category:'-'}</span></td><td class="num">${s.qty}</td><td class="num">${fmt(s.price)}</td><td class="num">${money(s.qty*s.price)}</td><td><button class="icon-btn" onclick="delSale('${s.id}')">🗑️</button></td></tr>`;}).join('')}
+      </tbody></table></div>`:'<div class="empty">ยังไม่มีรายการขายในวันนี้ กด “+ เพิ่มรายการขาย”</div>'}
+    </div>`;
+}
+function saleModal(){
+  const cats=[...new Set(menu().map(m=>m.category))];
+  openModal(`<h3>เพิ่มรายการขาย</h3>
+    <label class="fld">เมนู</label>
+    <select id="s_menu" onchange="s_price()">${menu().map(m=>`<option value="${m.id}">${m.name} — ${money(m.price)}</option>`).join('')}</select>
+    <div class="form-row" style="margin-top:12px">
+      <div><label class="fld">จำนวน</label><input type="number" id="s_qty" value="1" min="1" step="1"></div>
+      <div><label class="fld">ราคา/หน่วย</label><input type="number" id="s_price" step="0.01"></div>
+      <div><label class="fld">วันที่</label><input type="date" id="s_date" value="${salesDate}"></div>
+    </div>
+    <div class="actions"><button class="btn ghost" onclick="closeModal()">ยกเลิก</button><button class="btn primary" onclick="addSale()">บันทึกการขาย</button></div>`);
+  s_price();
+}
+function s_price(){const m=menu().find(x=>x.id===document.getElementById('s_menu').value);document.getElementById('s_price').value=m?m.price:0;}
+function addSale(){
+  const m=menu().find(x=>x.id===document.getElementById('s_menu').value);
+  const qty=+document.getElementById('s_qty').value||1;
+  const price=+document.getElementById('s_price').value||m.price;
+  const date=document.getElementById('s_date').value||todayStr();
+  DB.sales.push({id:uid(),date,menuId:m.id,name:m.name,qty,price,cost:m.cost});
+  save();closeModal();salesDate=date;viewSales();toast('บันทึกการขายแล้ว',1);
+}
+function delSale(id){DB.sales=DB.sales.filter(s=>s.id!==id);save();viewSales();toast('ลบรายการแล้ว');}
+
+/* =========================================================
+   สต็อกวัตถุดิบ
+   ========================================================= */
+let stockCat='ทั้งหมด';
+function viewStock(){
+  const v=document.getElementById('view');
+  document.getElementById('topActions').innerHTML=`<button class="btn primary" onclick="ingModal()">+ เพิ่มวัตถุดิบ</button>`;
+  const cats=['ทั้งหมด',...new Set(ing().map(i=>i.category))];
+  let items=ing();if(stockCat!=='ทั้งหมด')items=items.filter(i=>i.category===stockCat);
+  const low=lowStock().length;
+  v.innerHTML=`
+    <div class="grid kpis">
+      <div class="card kpi"><div class="label">มูลค่าสต็อกรวม</div><div class="val">${money(invValue())}</div></div>
+      <div class="card kpi"><div class="label">จำนวนวัตถุดิบ</div><div class="val">${ing().length}<small> รายการ</small></div></div>
+      <div class="card kpi"><div class="label">ต้องสั่งเพิ่ม</div><div class="val" style="color:${low?'#b7791f':'#0a8f0a'}">${low}<small> รายการ</small></div></div>
+    </div>
+    <div class="chips">${cats.map(c=>`<div class="chip ${c===stockCat?'active':''}" onclick="stockCat='${c}';viewStock()">${c}</div>`).join('')}</div>
+    <div class="card">
+      <div class="tbl-wrap"><table><thead><tr><th>วัตถุดิบ</th><th>หมวด</th><th class="num">คงเหลือ</th><th class="num">จุดสั่งซื้อ</th><th class="num">ต้นทุน/หน่วย</th><th class="num">มูลค่า</th><th>สถานะ</th><th></th></tr></thead><tbody>
+      ${items.map(i=>{
+        const st=i.stock<=0?['bad','หมด','#d03b3b']:(i.stock<=i.par?['warn','ใกล้หมด','#b7791f']:['good','พอ','#0a8f0a']);
+        return `<tr>
+          <td>${i.name}</td><td><span class="tag">${i.category}</span></td>
+          <td class="num" style="color:${st[2]}">${fmt(i.stock)} <span class="mini">${i.unit}</span></td>
+          <td class="num">${fmt(i.par)}</td><td class="num">${money(i.cost)}</td><td class="num">${money(i.stock*i.cost)}</td>
+          <td><span class="pill ${st[0]}">${st[1]}</span></td>
+          <td><button class="icon-btn" onclick="ingModal('${i.id}')">✏️</button><button class="icon-btn" onclick="delIng('${i.id}')">🗑️</button></td>
+        </tr>`;}).join('')}
+      </tbody></table></div>
+    </div>`;
+}
+function ingModal(id){
+  const it=id?ingById(id):{name:'',category:'',unit:'',cost:0,stock:0,par:0};
+  const cats=[...new Set(ing().map(i=>i.category))];
+  openModal(`<h3>${id?'แก้ไข':'เพิ่ม'}วัตถุดิบ</h3>
+    <label class="fld">ชื่อวัตถุดิบ</label><input id="i_name" value="${it.name}">
+    <div class="form-row" style="margin-top:12px">
+      <div><label class="fld">หมวด</label><input id="i_cat" list="catlist" value="${it.category}"><datalist id="catlist">${cats.map(c=>`<option value="${c}">`).join('')}</datalist></div>
+      <div><label class="fld">หน่วย</label><input id="i_unit" value="${it.unit}" placeholder="กิโล/ขวด/แพ็ค"></div>
+    </div>
+    <div class="form-row" style="margin-top:12px">
+      <div><label class="fld">คงเหลือปัจจุบัน</label><input type="number" id="i_stock" step="0.01" value="${it.stock}"></div>
+      <div><label class="fld">จุดสั่งซื้อ (Par)</label><input type="number" id="i_par" step="0.01" value="${it.par}"></div>
+      <div><label class="fld">ต้นทุน/หน่วย</label><input type="number" id="i_cost" step="0.01" value="${it.cost}"></div>
+    </div>
+    <div class="actions"><button class="btn ghost" onclick="closeModal()">ยกเลิก</button><button class="btn primary" onclick="saveIng('${id||''}')">บันทึก</button></div>`);
+}
+function saveIng(id){
+  const o={name:document.getElementById('i_name').value.trim(),category:document.getElementById('i_cat').value.trim()||'อื่นๆ',
+    unit:document.getElementById('i_unit').value.trim()||'หน่วย',stock:+document.getElementById('i_stock').value||0,
+    par:+document.getElementById('i_par').value||0,cost:+document.getElementById('i_cost').value||0};
+  if(!o.name){toast('กรุณาใส่ชื่อ');return;}
+  if(id){Object.assign(ingById(id),o);}else{o.id=uid();DB.ingredients.push(o);}
+  save();closeModal();viewStock();toast('บันทึกแล้ว',1);
+}
+function delIng(id){const i=ingById(id);if(confirm('ลบ "'+i.name+'" ?')){DB.ingredients=DB.ingredients.filter(x=>x.id!==id);save();viewStock();toast('ลบแล้ว');}}
+
+/* =========================================================
+   นับสต็อก
+   ========================================================= */
+let countDraft=null;
+function viewCount(){
+  const v=document.getElementById('view');
+  if(!countDraft){
+    document.getElementById('topActions').innerHTML=`<button class="btn primary" onclick="startCount()">+ เริ่มนับสต็อกรอบใหม่</button>`;
+    const hist=DB.counts.slice().reverse();
+    v.innerHTML=`
+      <div class="hint">การนับสต็อก = นับของจริงในร้าน แล้วกรอกเทียบกับยอดในระบบ ระบบจะบอก “ส่วนต่าง” (หาย/เกิน) และปรับยอดคงเหลือให้ตรงความจริง ควรนับสัปดาห์ละครั้งสำหรับของสด และเดือนละครั้งสำหรับของแห้ง</div>
+      <button class="btn primary" style="margin-bottom:18px" onclick="startCount()">✅ เริ่มนับสต็อกรอบใหม่</button>
+      <div class="card"><h3>ประวัติการนับสต็อก</h3>
+      ${hist.length?`<div class="tbl-wrap"><table><thead><tr><th>วันที่</th><th class="num">รายการที่นับ</th><th class="num">มีส่วนต่าง</th><th class="num">มูลค่าส่วนต่าง</th><th></th></tr></thead><tbody>
+        ${hist.map(c=>{const diffN=c.items.filter(x=>x.counted!==x.expected).length;const diffV=c.items.reduce((s,x)=>s+(x.counted-x.expected)*x.cost,0);return `<tr><td>${c.date} ${c.time||''}</td><td class="num">${c.items.length}</td><td class="num" style="color:${diffN?'#b7791f':'#0a8f0a'}">${diffN}</td><td class="num" style="color:${diffV<0?'#d03b3b':'#0a8f0a'}">${money(diffV)}</td><td><button class="btn sm" onclick="viewCountDetail('${c.id}')">ดู</button></td></tr>`;}).join('')}
+      </tbody></table></div>`:'<div class="empty">ยังไม่มีประวัติการนับ</div>'}
+      </div>`;
+    return;
+  }
+  // draft counting form
+  document.getElementById('topActions').innerHTML='';
+  const cats=[...new Set(countDraft.items.map(i=>i.category))];
+  let diffV=countDraft.items.reduce((s,x)=>s+((x.counted===''?x.expected:+x.counted)-x.expected)*x.cost,0);
+  v.innerHTML=`
+    <div class="hint">กรอก “นับได้จริง” ของแต่ละรายการ ช่องที่ไม่กรอกจะถือว่าตรงกับระบบ · เมื่อบันทึก ระบบจะปรับยอดคงเหลือให้เท่าที่นับได้</div>
+    <div class="flex" style="margin-bottom:14px">
+      <strong>นับสต็อก · ${countDraft.date}</strong>
+      <div class="right flex">
+        <span class="pill ${diffV<0?'bad':'neutral'}">มูลค่าส่วนต่าง: ${money(diffV)}</span>
+        <button class="btn ghost" onclick="countDraft=null;viewCount()">ยกเลิก</button>
+        <button class="btn primary" onclick="saveCount()">💾 บันทึกผลการนับ</button>
+      </div>
+    </div>
+    ${cats.map(cat=>`<div class="card" style="margin-bottom:14px"><h3>${cat}</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>วัตถุดิบ</th><th class="num">ระบบมี</th><th class="num" style="width:130px">นับได้จริง</th><th class="num">ส่วนต่าง</th></tr></thead><tbody>
+      ${countDraft.items.map((x,idx)=>x.category!==cat?'':`<tr>
+        <td>${x.name} <span class="mini">${x.unit}</span></td>
+        <td class="num">${fmt(x.expected)}</td>
+        <td class="num"><input type="number" step="0.01" style="text-align:right" value="${x.counted}" oninput="countDraft.items[${idx}].counted=this.value;countDiff(${idx})"></td>
+        <td class="num" id="diff_${idx}">${diffCell(x)}</td>
+      </tr>`).join('')}
+      </tbody></table></div></div>`).join('')}
+    <button class="btn primary" onclick="saveCount()">💾 บันทึกผลการนับ</button>`;
+}
+function diffCell(x){const c=x.counted===''?x.expected:+x.counted;const d=c-x.expected;if(Math.abs(d)<0.001)return '<span class="mini">ตรง</span>';return `<span style="color:${d<0?'#d03b3b':'#0a8f0a'}">${d>0?'+':''}${fmt(d)}</span>`;}
+function countDiff(idx){document.getElementById('diff_'+idx).innerHTML=diffCell(countDraft.items[idx]);viewCountTotals();}
+function viewCountTotals(){/* refresh header pill */const diffV=countDraft.items.reduce((s,x)=>s+((x.counted===''?x.expected:+x.counted)-x.expected)*x.cost,0);const p=document.querySelector('.pill');if(p){p.textContent='มูลค่าส่วนต่าง: '+money(diffV);p.className='pill '+(diffV<0?'bad':'neutral');}}
+function startCount(){
+  countDraft={date:todayStr(),items:ing().map(i=>({ingId:i.id,name:i.name,category:i.category,unit:i.unit,cost:i.cost,expected:i.stock,counted:''}))};
+  viewCount();
+}
+function saveCount(){
+  const items=countDraft.items.map(x=>({...x,counted:x.counted===''?x.expected:+x.counted}));
+  items.forEach(x=>{const it=ingById(x.ingId);if(it)it.stock=x.counted;});
+  const now=new Date();
+  DB.counts.push({id:uid(),date:countDraft.date,time:now.toTimeString().slice(0,5),items});
+  save();countDraft=null;viewCount();toast('บันทึกผลการนับและปรับสต็อกแล้ว',1);
+}
+function viewCountDetail(id){
+  const c=DB.counts.find(x=>x.id===id);
+  openModal(`<h3>ผลการนับ ${c.date} ${c.time||''}</h3>
+    <div class="tbl-wrap" style="max-height:55vh"><table><thead><tr><th>วัตถุดิบ</th><th class="num">ระบบ</th><th class="num">นับได้</th><th class="num">ส่วนต่าง</th></tr></thead><tbody>
+    ${c.items.map(x=>{const d=x.counted-x.expected;return `<tr><td>${x.name}</td><td class="num">${fmt(x.expected)}</td><td class="num">${fmt(x.counted)}</td><td class="num" style="color:${d<0?'#d03b3b':d>0?'#0a8f0a':'var(--muted)'}">${d>0?'+':''}${fmt(d)}</td></tr>`;}).join('')}
+    </tbody></table></div>
+    <div class="actions"><button class="btn primary" onclick="closeModal()">ปิด</button></div>`);
+}
+
+/* =========================================================
+   รับของเข้า
+   ========================================================= */
+function viewPurchase(){
+  const v=document.getElementById('view');
+  document.getElementById('topActions').innerHTML=`<button class="btn primary" onclick="receiveModal()">+ รับของเข้า</button>`;
+  const list=DB.purchases.slice().reverse().slice(0,60);
+  const total=DB.purchases.reduce((s,p)=>s+p.qty*p.unitCost,0);
+  const thisMonth=DB.purchases.filter(p=>p.date.slice(0,7)===todayStr().slice(0,7)).reduce((s,p)=>s+p.qty*p.unitCost,0);
+  v.innerHTML=`
+    <div class="hint">ทุกครั้งที่ซื้อ/รับวัตถุดิบเข้าร้าน บันทึกที่นี่ ระบบจะบวกยอดคงเหลือและอัปเดตต้นทุนล่าสุดให้อัตโนมัติ</div>
+    <div class="grid kpis">
+      <div class="card kpi"><div class="label">ค่าซื้อของเดือนนี้</div><div class="val">${money(thisMonth)}</div></div>
+      <div class="card kpi"><div class="label">ค่าซื้อของสะสม</div><div class="val">${money(total)}</div></div>
+      <div class="card kpi"><div class="label">จำนวนบิลรับของ</div><div class="val">${DB.purchases.length}</div></div>
+    </div>
+    <div class="card"><h3>ประวัติการรับของ <span class="spacer"></span><span class="mini">แสดง ${list.length} ล่าสุด</span></h3>
+    ${list.length?`<div class="tbl-wrap"><table><thead><tr><th>วันที่</th><th>วัตถุดิบ</th><th class="num">จำนวน</th><th class="num">ต้นทุน/หน่วย</th><th class="num">รวม</th><th>ผู้ขาย</th><th></th></tr></thead><tbody>
+      ${list.map(p=>`<tr><td>${p.date}</td><td>${p.name}</td><td class="num">${fmt(p.qty)}</td><td class="num">${money(p.unitCost)}</td><td class="num">${money(p.qty*p.unitCost)}</td><td><span class="tag">${p.supplier||'-'}</span></td><td><button class="icon-btn" onclick="delPurchase('${p.id}')">🗑️</button></td></tr>`).join('')}
+    </tbody></table></div>`:'<div class="empty">ยังไม่มีประวัติการรับของ</div>'}
+    </div>`;
+}
+function receiveModal(preId){
+  openModal(`<h3>รับของเข้า</h3>
+    <label class="fld">วัตถุดิบ</label>
+    <select id="p_ing" onchange="p_fill()">${ing().map(i=>`<option value="${i.id}" ${i.id===preId?'selected':''}>${i.name} (${i.unit})</option>`).join('')}</select>
+    <div class="form-row" style="margin-top:12px">
+      <div><label class="fld">จำนวนที่รับ</label><input type="number" id="p_qty" step="0.01" value="1"></div>
+      <div><label class="fld">ต้นทุน/หน่วย</label><input type="number" id="p_cost" step="0.01"></div>
+    </div>
+    <div class="form-row" style="margin-top:12px">
+      <div><label class="fld">ผู้ขาย/แหล่งซื้อ</label><input id="p_sup" placeholder="เช่น แม็คโคร"></div>
+      <div><label class="fld">วันที่</label><input type="date" id="p_date" value="${todayStr()}"></div>
+    </div>
+    <div class="actions"><button class="btn ghost" onclick="closeModal()">ยกเลิก</button><button class="btn primary" onclick="addPurchase()">บันทึกรับของ</button></div>`);
+  p_fill();
+}
+function p_fill(){const i=ingById(document.getElementById('p_ing').value);document.getElementById('p_cost').value=i?i.cost:0;}
+function addPurchase(){
+  const i=ingById(document.getElementById('p_ing').value);
+  const qty=+document.getElementById('p_qty').value||0;
+  const unitCost=+document.getElementById('p_cost').value||i.cost;
+  const supplier=document.getElementById('p_sup').value.trim();
+  const date=document.getElementById('p_date').value||todayStr();
+  if(qty<=0){toast('ใส่จำนวนให้ถูกต้อง');return;}
+  i.stock+=qty; i.cost=unitCost; // อัปเดตต้นทุนล่าสุด
+  DB.purchases.push({id:uid(),date,ingId:i.id,name:i.name,qty,unitCost,supplier});
+  save();closeModal();viewPurchase();toast('รับของเข้าและปรับสต็อกแล้ว',1);
+}
+function delPurchase(id){const p=DB.purchases.find(x=>x.id===id);if(confirm('ลบและหักสต็อกคืน?')){const i=ingById(p.ingId);if(i)i.stock=Math.max(0,i.stock-p.qty);DB.purchases=DB.purchases.filter(x=>x.id!==id);save();viewPurchase();toast('ลบแล้ว');}}
+
+/* =========================================================
+   เมนู & ต้นทุน
+   ========================================================= */
+function viewMenu(){
+  const v=document.getElementById('view');
+  document.getElementById('topActions').innerHTML=`<button class="btn primary" onclick="menuModal()">+ เพิ่มเมนู</button>`;
+  const cats=[...new Set(menu().map(m=>m.category))];
+  v.innerHTML=`
+    <div class="hint">ตั้งราคาขายและต้นทุนวัตถุดิบต่อจาน/แก้ว ระบบใช้คำนวณ Food Cost % และกำไรขั้นต้นอัตโนมัติ (เป้าหมายต้นทุนอาหารทั่วไป 28–35%)</div>
+    ${cats.map(cat=>{const items=menu().filter(m=>m.category===cat);return `
+      <div class="card" style="margin-bottom:14px"><h3>${cat} <span class="spacer"></span><span class="mini">${items.length} เมนู</span></h3>
+      <div class="tbl-wrap"><table><thead><tr><th>เมนู</th><th class="num">ราคาขาย</th><th class="num">ต้นทุน</th><th class="num">กำไร/หน่วย</th><th class="num">Food Cost</th><th></th></tr></thead><tbody>
+      ${items.map(m=>{const fc=m.price>0?m.cost/m.price*100:0;const bad=fc>(DB.settings.fcTarget||35);return `<tr>
+        <td>${m.name}</td><td class="num">${money(m.price)}</td><td class="num">${money(m.cost)}</td>
+        <td class="num" style="color:#0a8f0a">${money(m.price-m.cost)}</td>
+        <td class="num"><span class="pill ${bad?'warn':'good'}">${fmt(fc)}%</span></td>
+        <td><button class="icon-btn" onclick="menuModal('${m.id}')">✏️</button><button class="icon-btn" onclick="delMenu('${m.id}')">🗑️</button></td>
+      </tr>`;}).join('')}
+      </tbody></table></div></div>`;}).join('')}`;
+}
+function menuModal(id){
+  const m=id?menu().find(x=>x.id===id):{name:'',category:'',price:0,cost:0};
+  const cats=[...new Set(menu().map(x=>x.category))];
+  openModal(`<h3>${id?'แก้ไข':'เพิ่ม'}เมนู</h3>
+    <label class="fld">ชื่อเมนู</label><input id="m_name" value="${m.name}">
+    <label class="fld" style="margin-top:12px">หมวด</label><input id="m_cat" list="mcat" value="${m.category}"><datalist id="mcat">${cats.map(c=>`<option value="${c}">`).join('')}</datalist>
+    <div class="form-row" style="margin-top:12px">
+      <div><label class="fld">ราคาขาย</label><input type="number" id="m_price" step="0.01" value="${m.price}"></div>
+      <div><label class="fld">ต้นทุนวัตถุดิบ</label><input type="number" id="m_cost" step="0.01" value="${m.cost}"></div>
+    </div>
+    <div class="actions"><button class="btn ghost" onclick="closeModal()">ยกเลิก</button><button class="btn primary" onclick="saveMenu('${id||''}')">บันทึก</button></div>`);
+}
+function saveMenu(id){
+  const o={name:document.getElementById('m_name').value.trim(),category:document.getElementById('m_cat').value.trim()||'อื่นๆ',
+    price:+document.getElementById('m_price').value||0,cost:+document.getElementById('m_cost').value||0};
+  if(!o.name){toast('กรุณาใส่ชื่อเมนู');return;}
+  if(id){Object.assign(menu().find(x=>x.id===id),o);}else{o.id=uid();DB.menu.push(o);}
+  save();closeModal();viewMenu();toast('บันทึกแล้ว',1);
+}
+function delMenu(id){const m=menu().find(x=>x.id===id);if(confirm('ลบเมนู "'+m.name+'" ?')){DB.menu=DB.menu.filter(x=>x.id!==id);save();viewMenu();toast('ลบแล้ว');}}
+
+/* =========================================================
+   รายงาน
+   ========================================================= */
+let repDays=30;
+function viewReport(){
+  const v=document.getElementById('view');
+  const list=rangeSales(repDays);
+  const rev=sumRevenue(list),cost=sumCost(list),profit=rev-cost;
+  const fc=rev>0?cost/rev*100:0;
+  const purch=DB.purchases.filter(p=>p.date>=daysAgo(repDays-1));
+  const purchTotal=purch.reduce((s,p)=>s+p.qty*p.unitCost,0);
+  // by day
+  const byDay={};for(let i=repDays-1;i>=0;i--){const ds=daysAgo(i);byDay[ds]=0;}
+  list.forEach(s=>{byDay[s.date]=(byDay[s.date]||0)+s.qty*s.price;});
+  const dayArr=Object.entries(byDay);const maxD=Math.max(...dayArr.map(d=>d[1]),1);
+  // top items
+  const byItem={};list.forEach(s=>{if(!byItem[s.name])byItem[s.name]={qty:0,rev:0,profit:0};byItem[s.name].qty+=s.qty;byItem[s.name].rev+=s.qty*s.price;byItem[s.name].profit+=s.qty*(s.price-(s.cost||0));});
+  const topItems=Object.entries(byItem).sort((a,b)=>b[1].rev-a[1].rev);
+  // supplier spend
+  const bySup={};purch.forEach(p=>{bySup[p.supplier||'อื่นๆ']=(bySup[p.supplier||'อื่นๆ']||0)+p.qty*p.unitCost;});
+  const supArr=Object.entries(bySup).sort((a,b)=>b[1]-a[1]);
+
+  document.getElementById('topActions').innerHTML=`<button class="btn" onclick="exportSalesCSV()">⬇️ ส่งออก CSV</button>`;
+  v.innerHTML=`
+    <div class="chips">${[7,30,90].map(d=>`<div class="chip ${d===repDays?'active':''}" onclick="repDays=${d};viewReport()">${d} วัน</div>`).join('')}</div>
+    <div class="grid kpis">
+      <div class="card kpi"><div class="label">ยอดขายรวม</div><div class="val">${money(rev)}</div><div class="foot">${list.length} รายการ</div></div>
+      <div class="card kpi"><div class="label">ต้นทุนวัตถุดิบ (ขายไป)</div><div class="val">${money(cost)}</div><div class="foot">Food Cost ${fmt(fc)}%</div></div>
+      <div class="card kpi"><div class="label">กำไรขั้นต้น</div><div class="val" style="color:#0a8f0a">${money(profit)}</div><div class="foot">${rev>0?fmt(profit/rev*100):0}% ของยอดขาย</div></div>
+      <div class="card kpi"><div class="label">ค่าซื้อของเข้า</div><div class="val">${money(purchTotal)}</div><div class="foot">${purch.length} บิล</div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px"><h3>📈 ยอดขายรายวัน (${repDays} วัน)</h3>${dayChart(dayArr,maxD)}</div>
+    <div class="two-col">
+      <div class="card"><h3>🏆 เมนูขายดี / ทำกำไร</h3>
+        <div class="tbl-wrap"><table><thead><tr><th>เมนู</th><th class="num">ขาย</th><th class="num">ยอดขาย</th><th class="num">กำไร</th></tr></thead><tbody>
+        ${topItems.slice(0,12).map(t=>`<tr><td>${t[0]}</td><td class="num">${t[1].qty}</td><td class="num">${money(t[1].rev)}</td><td class="num" style="color:#0a8f0a">${money(t[1].profit)}</td></tr>`).join('')}
+        </tbody></table></div>
+      </div>
+      <div class="card"><h3>🚚 ค่าซื้อของแยกตามผู้ขาย</h3>
+        ${supArr.length?supArr.map((s,i)=>barRow(s[0],s[1],supArr[0][1],money(s[1]))).join(''):'<div class="empty">ไม่มีข้อมูล</div>'}
+        <div class="section-title">สรุปกำไรสุทธิเบื้องต้น</div>
+        <table><tbody>
+          <tr><td>ยอดขายรวม</td><td class="num">${money(rev)}</td></tr>
+          <tr><td>หัก ต้นทุนวัตถุดิบที่ขาย</td><td class="num" style="color:#d03b3b">- ${money(cost)}</td></tr>
+          <tr><td><strong>กำไรขั้นต้น</strong></td><td class="num"><strong style="color:#0a8f0a">${money(profit)}</strong></td></tr>
+        </tbody></table>
+        <div class="mini" style="margin-top:8px">* ยังไม่รวมค่าเช่า ค่าแรง ค่าน้ำไฟ</div>
+      </div>
+    </div>`;
+}
+function dayChart(arr,max){
+  const n=arr.length;const bw=100/n;
+  const bars=arr.map((d,i)=>{const h=Math.max(d[1]/max*100,1.5);return `<rect x="${i*bw+bw*0.12}%" y="${100-h}%" width="${bw*0.76}%" height="${h}%" rx="2" fill="url(#g1)"><title>${d[0]}: ${money(d[1])}</title></rect>`;}).join('');
+  return `<div style="height:170px"><svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
+    <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eb6834"/><stop offset="1" stop-color="#e34948"/></linearGradient></defs>${bars}</svg></div>
+    <div class="mini" style="display:flex;justify-content:space-between;margin-top:4px"><span>${arr[0]?arr[0][0]:''}</span><span>สูงสุด ${money(max)}</span><span>${arr[n-1]?arr[n-1][0]:''}</span></div>`;
+}
+function exportSalesCSV(){
+  const rows=[['วันที่','เมนู','จำนวน','ราคาต่อหน่วย','ยอดรวม','ต้นทุนต่อหน่วย']];
+  DB.sales.slice().sort((a,b)=>a.date<b.date?-1:1).forEach(s=>rows.push([s.date,s.name,s.qty,s.price,s.qty*s.price,s.cost||0]));
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  downloadFile(csv,'ยอดขาย_'+todayStr()+'.csv','text/csv');
+  toast('ส่งออกไฟล์ CSV แล้ว',1);
+}
+
+/* =========================================================
+   ตั้งค่า & สำรองข้อมูล
+   ========================================================= */
+function viewSettings(){
+  const v=document.getElementById('view');
+  v.innerHTML=`
+    <div class="card" style="max-width:560px;margin-bottom:14px">
+      <h3>⚙️ ข้อมูลร้าน</h3>
+      <label class="fld">ชื่อร้าน</label><input id="set_shop" value="${DB.settings.shop}">
+      <label class="fld" style="margin-top:12px">เป้าหมาย Food Cost สูงสุด (%)</label><input type="number" id="set_fc" value="${DB.settings.fcTarget||35}">
+      <div style="margin-top:16px"><button class="btn primary" onclick="saveSettings()">บันทึกการตั้งค่า</button></div>
+    </div>
+    <div class="card" style="max-width:560px;margin-bottom:14px">
+      <h3>💾 สำรอง & กู้คืนข้อมูล</h3>
+      <div class="mini" style="margin-bottom:12px">ข้อมูลทั้งหมดถูกเก็บในเบราว์เซอร์เครื่องนี้ ควรกด “ส่งออกข้อมูล” เก็บไฟล์สำรองเป็นประจำ (โดยเฉพาะก่อนล้างข้อมูลหรือเปลี่ยนเครื่อง)</div>
+      <div class="flex">
+        <button class="btn" onclick="exportData()">⬇️ ส่งออกข้อมูล (ไฟล์สำรอง)</button>
+        <button class="btn" onclick="document.getElementById('importFile').click()">⬆️ นำเข้าข้อมูล</button>
+        <input type="file" id="importFile" accept=".json" class="hide" onchange="importData(event)">
+      </div>
+    </div>
+    <div class="card" style="max-width:560px">
+      <h3>🧹 จัดการข้อมูล</h3>
+      <div class="flex">
+        <button class="btn" onclick="if(confirm('โหลดข้อมูลตัวอย่างใหม่ทับข้อมูลปัจจุบัน?')){DB=seed();save();render();toast(\\'โหลดตัวอย่างแล้ว\\',1);}">🔄 รีเซ็ตเป็นข้อมูลตัวอย่าง</button>
+        <button class="btn danger" onclick="clearAll()">🗑️ ล้างข้อมูลทั้งหมด</button>
+      </div>
+      <div class="mini" style="margin-top:12px">เวอร์ชันข้อมูล: ${KEY} · วัตถุดิบ ${ing().length} · เมนู ${menu().length} · ยอดขาย ${sales().length} รายการ</div>
+    </div>`;
+}
+function saveSettings(){DB.settings.shop=document.getElementById('set_shop').value.trim()||'ร้านของฉัน';DB.settings.fcTarget=+document.getElementById('set_fc').value||35;save();render();toast('บันทึกการตั้งค่าแล้ว',1);}
+function exportData(){downloadFile(JSON.stringify(DB,null,2),'สำรองข้อมูลร้าน_'+todayStr()+'.json','application/json');toast('ส่งออกไฟล์สำรองแล้ว',1);}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.ingredients||!d.menu)throw 0;DB=d;if(!DB.counts)DB.counts=[];if(!DB.settings)DB.settings={shop:'ร้านของฉัน',fcTarget:35};save();render();toast('นำเข้าข้อมูลสำเร็จ',1);}catch(err){toast('ไฟล์ไม่ถูกต้อง');}};r.readAsText(f);}
+function clearAll(){if(confirm('ลบข้อมูลทั้งหมดถาวร? (ควรส่งออกสำรองก่อน)')){localStorage.removeItem(KEY);DB=seed();save();render();toast('ล้างข้อมูลแล้ว');}}
+function downloadFile(content,name,type){const b=new Blob([content],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+
+/* =========================================================
+   QR สั่งอาหาร / เมนูออนไลน์
+   ========================================================= */
+function qrImg(base,table){const url=base+(base.indexOf('?')>=0?'&':'?')+'table='+table;return 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=10&data='+encodeURIComponent(url);}
+function viewQR(){
+  const v=document.getElementById('view');const o=DB.settings.order;
+  const tables=Math.max(1,Math.min(80,+o.tables||10));
+  document.getElementById('topActions').innerHTML=`<button class="btn" onclick="exportMenuJson()">⬇️ สร้าง menu.json</button><button class="btn primary" onclick="printQR()">🖨️ พิมพ์ QR ทุกโต๊ะ</button>`;
+  v.innerHTML=`
+    <div class="hint"><b>วิธีเปิดใช้ระบบสั่งผ่าน QR (ทำครั้งเดียว):</b><br>
+    1) อัปโหลดไฟล์ <code>order.html</code> และ <code>menu.json</code> ขึ้น GitHub ที่เดียวกับ index.html<br>
+    2) กรอกลิงก์หน้าเว็บสั่งอาหาร + LINE ของร้านด้านล่าง แล้วกดบันทึก<br>
+    3) กด “พิมพ์ QR ทุกโต๊ะ” เอาไปติดที่โต๊ะ · ลูกค้าสแกน → เลือกเมนู → ส่งออเดอร์เข้า LINE ร้าน<br>
+    * ถ้าแก้เมนู/ราคาในระบบ ให้กด “สร้าง menu.json” แล้วอัปโหลดทับของเดิม เมนูออนไลน์จะอัปเดตตาม</div>
+
+    <div class="card" style="max-width:660px;margin-bottom:14px">
+      <h3>⚙️ ตั้งค่าเมนูออนไลน์</h3>
+      <label class="fld">ลิงก์หน้าเว็บสั่งอาหาร (order.html บน GitHub Pages)</label>
+      <input id="q_url" value="${o.url||''}" placeholder="https://ชื่อผู้ใช้.github.io/repo/order.html">
+      <div class="form-row" style="margin-top:12px">
+        <div><label class="fld">LINE ของร้าน (Official Account ID เช่น @jmshop)</label><input id="q_line" value="${o.lineId||''}" placeholder="เว้นว่างได้ = ให้ลูกค้าเลือกแชทร้านเอง"></div>
+        <div><label class="fld">จำนวนโต๊ะ</label><input type="number" id="q_tables" value="${tables}" min="1" max="80"></div>
+      </div>
+      <label class="fld" style="margin-top:12px">ข้อความบนหน้าสั่งอาหาร</label>
+      <input id="q_note" value="${(o.note||'').replace(/"/g,'&quot;')}">
+      <div style="margin-top:14px"><button class="btn primary" onclick="saveQR()">บันทึกการตั้งค่า</button></div>
+    </div>
+
+    <div class="card">
+      <h3>📱 QR ประจำโต๊ะ <span class="spacer"></span><span class="mini">${o.url?tables+' โต๊ะ · พร้อมพิมพ์':'⚠️ กรอกลิงก์ด้านบนก่อน'}</span></h3>
+      ${o.url?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px">
+        ${Array.from({length:tables},(_,i)=>i+1).map(n=>`<div style="text-align:center;background:#fff;border-radius:12px;padding:12px"><img src="${qrImg(o.url,n)}" width="120" height="120" alt="โต๊ะ ${n}" loading="lazy" style="display:block;margin:0 auto"><div style="color:#111;font-weight:800;margin-top:6px">โต๊ะ ${n}</div></div>`).join('')}
+      </div><div class="mini" style="margin-top:12px">* QR สร้างจากบริการ api.qrserver.com (ตอนสร้าง/พิมพ์ต้องต่อเน็ต) เมื่อพิมพ์แล้วใช้ได้ตลอด</div>`:'<div class="empty">กรอก “ลิงก์หน้าเว็บสั่งอาหาร” ด้านบนแล้วกดบันทึก QR จะแสดงที่นี่</div>'}
+    </div>`;
+}
+function saveQR(){const o=DB.settings.order;o.url=document.getElementById('q_url').value.trim();o.lineId=document.getElementById('q_line').value.trim();o.tables=Math.max(1,Math.min(80,+document.getElementById('q_tables').value||10));o.note=document.getElementById('q_note').value.trim();save();viewQR();toast('บันทึกการตั้งค่าแล้ว',1);}
+function exportMenuJson(){
+  const o=DB.settings.order;
+  const data={shop:DB.settings.shop,line:o.lineId||'',note:o.note||'',firebase:DB.settings.firebase||null,items:menu().map(m=>({n:m.name,c:m.category,p:m.price}))};
+  downloadFile(JSON.stringify(data,null,2),'menu.json','application/json');
+  toast('สร้าง menu.json แล้ว — อัปโหลดทับไฟล์เดิมบน GitHub',1);
+}
+function printQR(){
+  const o=DB.settings.order;if(!o.url){toast('กรอกลิงก์หน้าเว็บสั่งอาหารก่อน');return;}
+  const tables=Math.max(1,Math.min(80,+o.tables||10));
+  const cells=Array.from({length:tables},(_,i)=>i+1).map(n=>`<div class="qc"><img src="${qrImg(o.url,n)}"><div class="lb">โต๊ะ ${n}</div><div class="sc">📱 สแกนเพื่อสั่งอาหาร</div></div>`).join('');
+  const w=window.open('','_blank');if(!w){toast('เบราว์เซอร์บล็อกป๊อปอัป กรุณาอนุญาต');return;}
+  w.document.write(`<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>QR ${DB.settings.shop}</title><style>
+    body{font-family:system-ui,"Sarabun",sans-serif;margin:0;padding:22px;color:#111}
+    h1{text-align:center;font-size:22px;margin:0 0 6px}.hint{text-align:center;color:#666;margin:0 0 20px;font-size:14px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .qc{border:1px dashed #bbb;border-radius:14px;padding:16px;text-align:center;page-break-inside:avoid}
+    .qc img{width:100%;max-width:190px}.lb{font-weight:800;font-size:20px;margin-top:8px}.sc{color:#555;font-size:13px;margin-top:2px}
+    @media print{.np{display:none}}
+  </style></head><body>
+    <h1>${DB.settings.shop}</h1><div class="hint">สแกน QR ที่โต๊ะเพื่อดูเมนูและสั่งอาหาร</div>
+    <div class="grid">${cells}</div>
+    <p class="np" style="text-align:center;margin-top:22px"><button onclick="window.print()" style="padding:10px 22px;font-size:15px;cursor:pointer">🖨️ พิมพ์</button></p>
+  </body></html>`);
+  w.document.close();
+}
+
+/* =========================================================
+   ออเดอร์สด (เรียลไทม์ผ่าน Firebase)
+   ========================================================= */
+let _fbdb=null,_fbUnsub=null,_orders=[],_lastOrderCount=0,_fbErr='';
+function fbConfig(){return DB.settings.firebase||null;}
+function initFirebase(){
+  const cfg=fbConfig();if(!cfg)return;
+  if(!window.firebase||!firebase.initializeApp){_fbErr='โหลด Firebase ไม่ได้ (ตรวจอินเทอร์เน็ต)';if(current==='orders')viewOrders();return;}
+  try{
+    if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(cfg);
+    _fbdb=firebase.firestore();_fbErr='';
+    startOrderListener();
+  }catch(e){_fbErr=String((e&&e.message)||e);}
+}
+function startOrderListener(){
+  if(!_fbdb||_fbUnsub)return;
+  try{
+    _fbUnsub=_fbdb.collection('orders').orderBy('createdAt','asc').onSnapshot(function(snap){
+      _orders=snap.docs.map(function(d){var o=d.data()||{};o.id=d.id;return o;}).filter(function(o){return o.status!=='done';});
+      onOrdersUpdate();
+    },function(err){_fbErr=String((err&&err.message)||err);if(current==='orders')viewOrders();});
+  }catch(e){_fbErr=String((e&&e.message)||e);}
+}
+function onOrdersUpdate(){
+  const n=_orders.length;
+  if(n>_lastOrderCount){beep();try{if(Notification&&Notification.permission==='granted')new Notification('🔔 ออเดอร์ใหม่!',{body:n+' ออเดอร์รอดำเนินการ'});}catch(e){}}
+  _lastOrderCount=n;buildNav();
+  if(current==='orders')viewOrders();
+}
+function beep(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var a=new C();var o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.type='sine';o.frequency.value=880;g.gain.setValueAtTime(.0001,a.currentTime);g.gain.exponentialRampToValueAtTime(.35,a.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.5);o.start();o.stop(a.currentTime+.55);}catch(e){}}
+function viewOrders(){
+  const v=document.getElementById('view');const cfg=fbConfig();
+  if(!cfg){document.getElementById('topActions').innerHTML='';v.innerHTML=orderSetupHTML();return;}
+  document.getElementById('topActions').innerHTML='<span class="mini" style="margin-right:8px">'+(_fbErr?('⚠️ '+esc(_fbErr)):(_fbdb?'🟢 เชื่อมต่อแล้ว':'⏳ กำลังเชื่อม...'))+'</span><button class="btn sm" onclick="askNotify()">🔔</button> <button class="btn sm" onclick="openFbConfig()">⚙️</button>';
+  const list=_orders.slice();
+  v.innerHTML=`
+    <div class="hint">ออเดอร์จากลูกค้าเด้งเข้ามาที่นี่แบบเรียลไทม์ · กด “รับออเดอร์” เมื่อเริ่มทำ · กด “เสิร์ฟแล้ว” เพื่อปิดออเดอร์และ<b>บันทึกยอดขายเข้าระบบอัตโนมัติ</b></div>
+    ${list.length? '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px">'+list.map(orderCard).join('')+'</div>' : '<div class="card"><div class="empty">🍜 ยังไม่มีออเดอร์<br><span class="mini">รอลูกค้าสแกน QR สั่งอาหาร · หน้านี้จะเด้งเตือนอัตโนมัติ</span></div></div>'}
+  `;
+}
+function orderCard(o){
+  const items=(o.items||[]).map(function(it){return '<div class="row" style="padding:7px 0"><div class="rn">'+esc(it.n)+' <span class="mini">x'+(it.q||0)+'</span></div><div class="rt">'+money((it.p||0)*(it.q||0))+'</div></div>';}).join('');
+  const st=o.status==='preparing'?['warn','👨‍🍳 กำลังทำ']:['bad','🆕 ใหม่'];
+  const t=(o.createdAt&&o.createdAt.toDate)?o.createdAt.toDate():null;
+  const tm=t?(String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')):'';
+  return '<div class="card" style="border-color:'+(o.status==='preparing'?'rgba(250,178,25,.4)':'rgba(227,73,72,.4)')+'">'+
+    '<h3>🪑 โต๊ะ '+esc(o.table||'-')+' <span class="pill '+st[0]+'" style="margin-left:8px">'+st[1]+'</span><span class="spacer"></span><span class="mini">'+tm+'</span></h3>'+
+    items+
+    (o.note?'<div class="hint" style="margin:10px 0 0">📝 '+esc(o.note)+'</div>':'')+
+    '<div class="totrow" style="display:flex;justify-content:space-between;margin-top:10px;font-weight:700;font-size:16px">รวม <span style="color:var(--accent)">'+money(o.total||0)+'</span></div>'+
+    '<div class="flex" style="margin-top:12px">'+
+      (o.status==='new'?'<button class="btn primary" style="flex:1" onclick="orderAccept(\''+o.id+'\')">👨‍🍳 รับออเดอร์</button>':'<button class="btn primary" style="flex:1" onclick="orderDone(\''+o.id+'\')">✅ เสิร์ฟแล้ว + บันทึกยอด</button>')+
+      '<button class="btn danger" onclick="orderCancel(\''+o.id+'\')">✕</button>'+
+    '</div></div>';
+}
+function orderAccept(id){if(_fbdb)_fbdb.collection('orders').doc(id).update({status:'preparing'}).catch(function(e){toast('ผิดพลาด: '+e.message);});}
+function orderDone(id){
+  const o=_orders.find(function(x){return x.id===id;});if(!o)return;
+  recordOrderSale(o);
+  if(_fbdb)_fbdb.collection('orders').doc(id).delete().catch(function(){});
+  toast('บันทึกยอดขายโต๊ะ '+(o.table||'')+' แล้ว ✅',1);
+}
+function orderCancel(id){if(confirm('ยกเลิกออเดอร์นี้?')){if(_fbdb)_fbdb.collection('orders').doc(id).delete().catch(function(){});toast('ยกเลิกออเดอร์แล้ว');}}
+function recordOrderSale(o){
+  const date=todayStr();
+  (o.items||[]).forEach(function(it){
+    const m=menu().find(function(x){return x.name===it.n;});
+    DB.sales.push({id:uid(),date,menuId:m?m.id:'',name:it.n,qty:it.q||0,price:it.p||0,cost:m?m.cost:0});
+  });
+  save();
+}
+function askNotify(){try{if(window.Notification)Notification.requestPermission();}catch(e){}}
+function orderSetupHTML(){
+  return `<div class="hint">⚡ ระบบออเดอร์เรียลไทม์ใช้ <b>Firebase (ฟรี)</b> เป็นตัวเชื่อมมือถือลูกค้ากับหน้าครัว — ตั้งค่าครั้งเดียวจบ</div>
+  <div class="card" style="max-width:740px">
+    <h3>วิธีเชื่อม Firebase (ประมาณ 5 นาที)</h3>
+    <ol style="line-height:1.95;padding-left:20px;color:var(--ink2)">
+      <li>เข้า <b>console.firebase.google.com</b> → <b>Add project</b> → ตั้งชื่อ (ข้าม Google Analytics ได้)</li>
+      <li>เมนูซ้าย <b>Build → Firestore Database → Create database</b> → เลือก <b>Start in test mode</b> → location <b>asia-southeast1</b> → Enable</li>
+      <li>กดเฟือง ⚙️ → <b>Project settings</b> → เลื่อนลงหัวข้อ <b>Your apps</b> → กดไอคอน <b>&lt;/&gt;</b> (Web) → ตั้งชื่อ → Register app</li>
+      <li>จะเห็นโค้ด <code>const firebaseConfig = { ... }</code> — ก๊อป<b>เฉพาะในวงเล็บปีกกา { } ทั้งก้อน</b> มาวางด้านล่าง</li>
+    </ol>
+    <label class="fld">วาง Firebase config ที่นี่</label>
+    <textarea id="fb_cfg" style="width:100%;min-height:160px;background:var(--page);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:11px;font-family:monospace;font-size:13px" placeholder='{
+  "apiKey": "AIza...",
+  "authDomain": "xxx.firebaseapp.com",
+  "projectId": "xxx",
+  "storageBucket": "xxx.appspot.com",
+  "messagingSenderId": "123456",
+  "appId": "1:123:web:abc"
+}'></textarea>
+    <div style="margin-top:14px"><button class="btn primary" onclick="saveFbConfig()">🔗 เชื่อมต่อ Firebase</button></div>
+    <div class="mini" style="margin-top:16px;line-height:1.7">หลังเชื่อมแล้ว ไปแท็บ <b>QR สั่งอาหาร</b> กด “สร้าง menu.json” แล้วอัปโหลดใหม่ เพื่อให้หน้าลูกค้าส่งออเดอร์เข้าครัวได้<br>
+    ⚠️ Test mode ใช้ได้ 30 วัน — ถ้าจะใช้ยาว ไปที่ Firestore → <b>Rules</b> วาง <code>allow read, write: if true;</code> แล้ว Publish</div>
+  </div>`;
+}
+function openFbConfig(){
+  const cur=fbConfig()?JSON.stringify(fbConfig(),null,2):'';
+  openModal('<h3>ตั้งค่า Firebase</h3><label class="fld">Firebase config (JSON)</label><textarea id="fb_cfg" style="width:100%;min-height:180px;background:var(--page);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:11px;font-family:monospace;font-size:13px">'+esc(cur)+'</textarea><div class="actions"><button class="btn danger" onclick="disconnectFb()">ตัดการเชื่อมต่อ</button><button class="btn ghost" onclick="closeModal()">ยกเลิก</button><button class="btn primary" onclick="saveFbConfig(true)">บันทึก</button></div>');
+}
+function disconnectFb(){DB.settings.firebase=null;save();if(_fbUnsub){try{_fbUnsub();}catch(e){}_fbUnsub=null;}_fbdb=null;_orders=[];_lastOrderCount=0;closeModal();buildNav();viewOrders();toast('ตัดการเชื่อมต่อแล้ว');}
+function saveFbConfig(fromModal){
+  const raw=document.getElementById('fb_cfg').value.trim();
+  if(!raw){toast('วาง config ก่อน');return;}
+  let cfg;
+  try{cfg=JSON.parse(raw);}catch(e){try{cfg=(new Function('return ('+raw+')'))();}catch(e2){toast('config ไม่ถูกต้อง ตรวจวงเล็บ { } อีกครั้ง');return;}}
+  if(!cfg||!cfg.projectId){toast('config ไม่ครบ (ไม่พบ projectId)');return;}
+  DB.settings.firebase=cfg;save();
+  if(fromModal)closeModal();
+  if(_fbUnsub){try{_fbUnsub();}catch(e){}_fbUnsub=null;}_fbdb=null;
+  initFirebase();buildNav();viewOrders();
+  toast('เชื่อม Firebase แล้ว! อย่าลืมสร้าง menu.json ใหม่',1);
+}
+
+/* ---------- start ---------- */
+load();initFirebase();render();
+</script>
+</body>
+</html>
